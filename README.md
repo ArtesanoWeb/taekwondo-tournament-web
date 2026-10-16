@@ -48,6 +48,7 @@ datos o lanza un `ApiError` con el mensaje en español.
 | `npm start`            | Sirve el build de producción                  |
 | `npm run lint`         | Revisa el código con ESLint                   |
 | `npm run typecheck`    | Revisa los tipos de TypeScript                |
+| `npm test`             | Corre los tests con Vitest                    |
 | `npm run format`       | Formatea el código con Prettier               |
 | `npm run format:check` | Verifica el formato sin modificar archivos    |
 | `npm run api:types`    | Regenera los tipos de la API desde OpenAPI    |
