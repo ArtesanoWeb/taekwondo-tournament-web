@@ -67,11 +67,17 @@ estados de carga y error, usable en celular, lint y build en verde, mergeado en 
 | `main`                          | Solo versiones publicadas, cada una con su tag (`v0.1.0`…)   |
 | `develop`                       | Integración: lo terminado y revisado. Es la rama por defecto |
 | `feature/<issue>-<descripción>` | Una por issue, por ejemplo `feature/4-cliente-api`           |
+| `release/X.Y.Z`                 | Preparar una versión (changelog y número de versión)         |
 
 1. `git checkout develop && git pull`
 2. `git checkout -b feature/4-cliente-api`
 3. Commits chicos con prefijo `feat:`, `fix:`, `docs:`, `chore:`…
 4. Pull request hacia `develop` con `Closes #N` en la descripción.
-5. Para publicar una versión: pull request de `develop` hacia `main` y tag de la versión.
+5. Para publicar una versión `X.Y.Z`:
+   1. Rama `release/X.Y.Z` desde `develop`: versión en `package.json` y sección nueva en
+      [`CHANGELOG.md`](CHANGELOG.md), nada más.
+   2. Pull request de `release/X.Y.Z` hacia `main` (merge commit).
+   3. Tag anotado sobre `main`: `git tag -a vX.Y.Z -m "X.Y.Z"` y `git push origin vX.Y.Z`.
+   4. Mergear `main` de vuelta en `develop` para que tenga los cambios del release.
 
 Nunca se commitea directo en `main` ni en `develop`.
