@@ -11,6 +11,21 @@
   /* Hong (red) and chung (blue): the two sides of a taekwondo match. */
   --color-hong: var(--color-red-600);
   --color-chung: var(--color-blue-600);
+
+  /* Hidden (also from screen readers) for 3 s, then fades in. Render's free plan can take 30-50 s
+     to wake up, so this only shows when the API is actually slow. */
+  --animate-reveal-late: reveal 300ms ease-out 3s both;
+
+  @keyframes reveal {
+    from {
+      visibility: hidden;
+      opacity: 0;
+    }
+    to {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

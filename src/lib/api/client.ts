@@ -23,6 +23,23 @@ export const api = createApiClient();
 
 type ApiResult<T> = { data?: T; error?: unknown; response: Response };
 
+export type Result<T> = { ok: true; data: T } | { ok: false; error: ApiError };
+
+/**
+ * Like `unwrap`, but returns the error instead of throwing it. Server Components should use this
+ * and render the message themselves: in production Next hides thrown error messages from `error.tsx`.
+ */
+export async function attempt<T>(
+  request: Promise<ApiResult<T>>,
+): Promise<Result<T>> {
+  try {
+    return { ok: true, data: await unwrap(request) };
+  } catch (error) {
+    if (error instanceof ApiError) return { ok: false, error };
+    throw error;
+  }
+}
+
 /** Awaits an `api.GET(...)`-style call and returns its data, or throws an `ApiError` in Spanish. */
 export async function unwrap<T>(request: Promise<ApiResult<T>>): Promise<T> {
   let result: ApiResult<T>;
