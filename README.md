@@ -23,6 +23,22 @@ npm run dev
 
 Queda en [http://localhost:3000](http://localhost:3000).
 
+## API
+
+Por defecto usa el servidor dev
+(`https://taekwondo-tournament-manager-dev.onrender.com`). Para apuntar a otro, por ejemplo al
+backend local con Docker, copiar `.env.example` a `.env.local` y cambiar `API_URL`.
+
+Los tipos de TypeScript de la API (`src/lib/api/schema.d.ts`) se generan desde su contrato OpenAPI.
+Cuando la API cambie, regenerarlos con:
+
+```bash
+npm run api:types
+```
+
+El cliente (`src/lib/api/client.ts`) solo se usa desde el servidor de Next. `unwrap()` devuelve los
+datos o lanza un `ApiError` con el mensaje en español.
+
 ## Scripts
 
 | Comando                | Qué hace                                      |
@@ -34,6 +50,7 @@ Queda en [http://localhost:3000](http://localhost:3000).
 | `npm run typecheck`    | Revisa los tipos de TypeScript                |
 | `npm run format`       | Formatea el código con Prettier               |
 | `npm run format:check` | Verifica el formato sin modificar archivos    |
+| `npm run api:types`    | Regenera los tipos de la API desde OpenAPI    |
 
 ## Cómo se trabaja
 
