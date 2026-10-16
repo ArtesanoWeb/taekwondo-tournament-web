@@ -40,4 +40,20 @@ Queda en [http://localhost:3000](http://localhost:3000).
 El backlog y los sprints viven en el
 [GitHub Project](https://github.com/users/ArtesanoWeb/projects/1). Cada cambio referencia su issue
 (`Closes #N`) y debe cumplir la _Definition of Done_: funciona contra la API, textos en español,
-estados de carga y error, usable en celular, lint y build en verde, mergeado en `main`.
+estados de carga y error, usable en celular, lint y build en verde, mergeado en `develop`.
+
+### Flujo de ramas (Git Flow)
+
+| Rama                            | Para qué                                                     |
+| ------------------------------- | ------------------------------------------------------------ |
+| `main`                          | Solo versiones publicadas, cada una con su tag (`v0.1.0`…)   |
+| `develop`                       | Integración: lo terminado y revisado. Es la rama por defecto |
+| `feature/<issue>-<descripción>` | Una por issue, por ejemplo `feature/4-cliente-api`           |
+
+1. `git checkout develop && git pull`
+2. `git checkout -b feature/4-cliente-api`
+3. Commits chicos con prefijo `feat:`, `fix:`, `docs:`, `chore:`…
+4. Pull request hacia `develop` con `Closes #N` en la descripción.
+5. Para publicar una versión: pull request de `develop` hacia `main` y tag de la versión.
+
+Nunca se commitea directo en `main` ni en `develop`.
