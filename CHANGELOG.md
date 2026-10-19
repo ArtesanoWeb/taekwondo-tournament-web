@@ -7,6 +7,11 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+### Added
+
+- Detalle de torneo en `/torneos/{id}`: datos del torneo y sus categorías agrupadas por género,
+  con rango de edad, peso y grupo de cinturón; "Torneo no encontrado" si no existe (#11).
+
 ## [0.1.0] - 2026-10-16
 
 Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1).
