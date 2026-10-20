@@ -41,6 +41,27 @@ npm run api:types
 El cliente (`src/lib/api/client.ts`) solo se usa desde el servidor de Next. `unwrap()` devuelve los
 datos o lanza un `ApiError` con el mensaje en español.
 
+### Backend local con datos de prueba
+
+El servidor dev es compartido y lento al despertar; para desarrollar conviene el backend en local
+(requiere Docker). Con el repositorio del backend clonado en `../Backend`:
+
+```bash
+cd ../Backend && docker compose up -d     # API en http://localhost:8000 (admin/admin)
+cd ../Frontend
+echo "API_URL=http://localhost:8000" > .env.local
+npm run seed                              # carga torneos, categorías y llaves de prueba
+npm run dev
+```
+
+`npm run seed` crea tres torneos (en curso, finalizado y en borrador) con llaves en todos los estados:
+a medio jugar, con pases directos, con campeón, de 2 a 16 atletas y categorías sin llave. Solo
+funciona contra un backend local (la API no permite borrar datos) y no duplica nada si se corre dos
+veces. Para empezar de cero: `cd ../Backend && docker compose down -v && docker compose up -d`.
+
+No hace falta configurar CORS ni un proxy: el navegador nunca llama a la API, la pide el servidor de
+Next.
+
 ## Scripts
 
 | Comando                | Qué hace                                      |
@@ -54,6 +75,7 @@ datos o lanza un `ApiError` con el mensaje en español.
 | `npm run format`       | Formatea el código con Prettier               |
 | `npm run format:check` | Verifica el formato sin modificar archivos    |
 | `npm run api:types`    | Regenera los tipos de la API desde OpenAPI    |
+| `npm run seed`         | Carga datos de prueba en el backend local     |
 
 ## Cómo se trabaja
 
