@@ -11,6 +11,9 @@ desarrollo inicial y puede cambiar entre versiones.
 
 - Detalle de torneo en `/torneos/{id}`: datos del torneo y sus categorías agrupadas por género,
   con rango de edad, peso y grupo de cinturón; "Torneo no encontrado" si no existe (#11).
+- Llave de cada categoría en `/categorias/{id}`: rondas en columnas (Octavos, Cuartos, Semifinal,
+  Final), atletas de cada lado con los rounds ganados y el ganador resaltado; aviso si la llave
+  todavía no fue sorteada (#27).
 
 ## [0.1.0] - 2026-10-16
 
