@@ -1,5 +1,7 @@
 # Taekwondo Tournament Web
 
+[![CI](https://github.com/ArtesanoWeb/taekwondo-tournament-web/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/ArtesanoWeb/taekwondo-tournament-web/actions/workflows/ci.yml)
+
 Frontend web para gestionar y seguir torneos de taekwondo: lista de torneos, categorías y llaves de
 combate. Consume la API de
 [taekwondo-tournament-manager](https://github.com/pacha2880/taekwondo-tournament-manager)
