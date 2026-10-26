@@ -7,6 +7,11 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-26
+
+Del torneo a la llave: ya se puede entrar a un torneo, elegir una categoría y seguir su llave
+(Sprint 2). Primera versión publicada en Vercel.
+
 ### Added
 
 - Detalle de torneo en `/torneos/{id}`: datos del torneo y sus categorías agrupadas por género,
@@ -17,6 +22,16 @@ desarrollo inicial y puede cambiar entre versiones.
 - En la llave: líneas que conectan cada combate con el siguiente, estado de cada combate
   (Pendiente, Finalizado, Pase directo), "Sin rival" en los pases directos y "Por definir" en los
   lados que esperan un resultado (#29).
+- Para desarrollo: integración continua en GitHub Actions (#7) y `npm run seed` para cargar datos de
+  prueba en un backend local con Docker (#3).
+
+### Fixed
+
+- Las tarjetas de la lista de torneos ya no llevan a una página 404 (known issue de la 0.1.0).
+
+### Known issues
+
+- En el celular la llave se recorre con scroll horizontal; una vista optimizada llega con el #28.
 
 ## [0.1.0] - 2026-10-16
 
@@ -40,5 +55,6 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.1.0...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.2.0...develop
+[0.2.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/releases/tag/v0.1.0
