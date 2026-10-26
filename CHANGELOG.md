@@ -14,6 +14,9 @@ desarrollo inicial y puede cambiar entre versiones.
 - Llave de cada categoría en `/categorias/{id}`: rondas en columnas (Octavos, Cuartos, Semifinal,
   Final), atletas de cada lado con los rounds ganados y el ganador resaltado; aviso si la llave
   todavía no fue sorteada (#27).
+- En la llave: líneas que conectan cada combate con el siguiente, estado de cada combate
+  (Pendiente, Finalizado, Pase directo), "Sin rival" en los pases directos y "Por definir" en los
+  lados que esperan un resultado (#29).
 
 ## [0.1.0] - 2026-10-16
 
