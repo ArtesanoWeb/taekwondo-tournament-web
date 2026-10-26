@@ -1,6 +1,6 @@
 {
   "name": "taekwondo-tournament-web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,7 +11,8 @@
     "format:check": "prettier --check .",
     "typecheck": "next typegen && tsc --noEmit",
     "api:types": "openapi-typescript ${API_URL:-https://taekwondo-tournament-manager-dev.onrender.com}/openapi.json -o src/lib/api/schema.d.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "seed": "node scripts/seed.mjs"
   },
   "dependencies": {
     "next": "16.4.2",

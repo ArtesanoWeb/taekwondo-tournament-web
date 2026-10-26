@@ -1,5 +1,7 @@
 # Taekwondo Tournament Web
 
+[![CI](https://github.com/ArtesanoWeb/taekwondo-tournament-web/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/ArtesanoWeb/taekwondo-tournament-web/actions/workflows/ci.yml)
+
 Frontend web para gestionar y seguir torneos de taekwondo: lista de torneos, categorías y llaves de
 combate. Consume la API de
 [taekwondo-tournament-manager](https://github.com/pacha2880/taekwondo-tournament-manager)
@@ -39,6 +41,27 @@ npm run api:types
 El cliente (`src/lib/api/client.ts`) solo se usa desde el servidor de Next. `unwrap()` devuelve los
 datos o lanza un `ApiError` con el mensaje en español.
 
+### Backend local con datos de prueba
+
+El servidor dev es compartido y lento al despertar; para desarrollar conviene el backend en local
+(requiere Docker). Con el repositorio del backend clonado en `../Backend`:
+
+```bash
+cd ../Backend && docker compose up -d     # API en http://localhost:8000 (admin/admin)
+cd ../Frontend
+echo "API_URL=http://localhost:8000" > .env.local
+npm run seed                              # carga torneos, categorías y llaves de prueba
+npm run dev
+```
+
+`npm run seed` crea tres torneos (en curso, finalizado y en borrador) con llaves en todos los estados:
+a medio jugar, con pases directos, con campeón, de 2 a 16 atletas y categorías sin llave. Solo
+funciona contra un backend local (la API no permite borrar datos) y no duplica nada si se corre dos
+veces. Para empezar de cero: `cd ../Backend && docker compose down -v && docker compose up -d`.
+
+No hace falta configurar CORS ni un proxy: el navegador nunca llama a la API, la pide el servidor de
+Next.
+
 ## Scripts
 
 | Comando                | Qué hace                                      |
@@ -52,6 +75,20 @@ datos o lanza un `ApiError` con el mensaje en español.
 | `npm run format`       | Formatea el código con Prettier               |
 | `npm run format:check` | Verifica el formato sin modificar archivos    |
 | `npm run api:types`    | Regenera los tipos de la API desde OpenAPI    |
+| `npm run seed`         | Carga datos de prueba en el backend local     |
+
+## Despliegue
+
+En [Vercel](https://vercel.com), conectado a este repositorio:
+
+| Rama                                | Despliegue                                                   | `API_URL`                                               |
+| ----------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
+| `main`                              | **Production** (la versión publicada)                        | `https://taekwondo-tournament-manager.onrender.com`     |
+| `develop`, `feature/*`, `release/*` | **Preview**: una URL de prueba por push, enlazada en cada PR | `https://taekwondo-tournament-manager-dev.onrender.com` |
+
+Publicar en producción es hacer un release (ver Git Flow abajo): al mergear `release/X.Y.Z` en
+`main`, Vercel despliega solo. No hace falta CORS en el backend porque la API se pide desde el
+servidor de Next, no desde el navegador.
 
 ## Cómo se trabaja
 
