@@ -77,6 +77,19 @@ Next.
 | `npm run api:types`    | Regenera los tipos de la API desde OpenAPI    |
 | `npm run seed`         | Carga datos de prueba en el backend local     |
 
+## Despliegue
+
+En [Vercel](https://vercel.com), conectado a este repositorio:
+
+| Rama                                | Despliegue                                                   | `API_URL`                                               |
+| ----------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
+| `main`                              | **Production** (la versión publicada)                        | `https://taekwondo-tournament-manager.onrender.com`     |
+| `develop`, `feature/*`, `release/*` | **Preview**: una URL de prueba por push, enlazada en cada PR | `https://taekwondo-tournament-manager-dev.onrender.com` |
+
+Publicar en producción es hacer un release (ver Git Flow abajo): al mergear `release/X.Y.Z` en
+`main`, Vercel despliega solo. No hace falta CORS en el backend porque la API se pide desde el
+servidor de Next, no desde el navegador.
+
 ## Cómo se trabaja
 
 El backlog y los sprints viven en el
