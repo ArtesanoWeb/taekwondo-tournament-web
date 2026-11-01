@@ -88,8 +88,13 @@ En [Vercel](https://vercel.com), conectado a este repositorio:
 
 | Rama                                | Despliegue                                                   | `API_URL`                                               |
 | ----------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
-| `main`                              | **Production** (la versión publicada)                        | `https://taekwondo-tournament-manager.onrender.com`     |
+| `main`                              | **Production** (la versión publicada)                        | `https://taekwondo-tournament-manager-dev.onrender.com` |
 | `develop`, `feature/*`, `release/*` | **Preview**: una URL de prueba por push, enlazada en cada PR | `https://taekwondo-tournament-manager-dev.onrender.com` |
+
+Por ahora los dos ambientes leen del backend **dev**, acordado con el equipo del backend: así el sitio
+publicado se prueba con los datos y los cambios que el backend está desarrollando. El backend de
+producción (`https://taekwondo-tournament-manager.onrender.com`) queda para cuando el torneo se use de
+verdad; para volver a él basta cambiar `API_URL` del ambiente Production en Vercel y redesplegar.
 
 Publicar en producción es hacer un release (ver Git Flow abajo): al mergear `release/X.Y.Z` en
 `main`, Vercel despliega solo. No hace falta CORS en el backend porque la API se pide desde el
