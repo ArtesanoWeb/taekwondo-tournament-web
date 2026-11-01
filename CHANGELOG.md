@@ -7,6 +7,12 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+### Changed
+
+- Para desarrollo: `npm run seed` funciona con la API 0.5 (inicia y finaliza los torneos con
+  `start`/`finish`, ya no envía `round_number`), tipos de la API regenerados y Next 16.4.3 /
+  React 19.3.1 (#37).
+
 ## [0.2.0] - 2026-10-26
 
 Del torneo a la llave: ya se puede entrar a un torneo, elegir una categoría y seguir su llave
