@@ -7,6 +7,12 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+### Added
+
+- Administración: inicio de sesión en `/admin/login` y panel en `/admin`. La sesión se guarda en una
+  cookie `httpOnly`; sin sesión, las páginas del admin llevan al login y después vuelven a la página
+  pedida; si la sesión vence aparece "Tu sesión venció"; botón "Cerrar sesión" (#39).
+
 ### Changed
 
 - Para desarrollo: `npm run seed` funciona con la API 0.5 (inicia y finaliza los torneos con
