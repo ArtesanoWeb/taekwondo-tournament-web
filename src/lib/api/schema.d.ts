@@ -65,7 +65,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Actualizar un club
+         * @description Modifica el nombre del club, que debe seguir siendo único. Requiere token.
+         */
+        patch: operations["update_club"];
         trace?: never;
     };
     "/api/v1/athletes": {
@@ -77,13 +81,13 @@ export interface paths {
         };
         /**
          * Listar atletas
-         * @description Devuelve todos los atletas con su club, ordenados por nombre. Incluye fecha de nacimiento y peso, por eso requiere token.
+         * @description Devuelve los atletas con su club, ordenados por nombre. Con `q` solo devuelve los que contienen ese texto en el nombre o en el CI, sin distinguir mayúsculas ni tildes (`perez` encuentra a `Pérez`). Incluye fecha de nacimiento y peso, por eso requiere token.
          */
         get: operations["list_athletes"];
         put?: never;
         /**
          * Crear un atleta
-         * @description Crea un atleta asignado a un club que ya existe. Requiere token.
+         * @description Crea un atleta asignado a un club que ya existe. El CI es opcional; si se informa, no puede repetirse y, si no cumple el formato, responde 422. Requiere token.
          */
         post: operations["create_athlete"];
         delete?: never;
@@ -109,7 +113,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Actualizar un atleta
+         * @description Modifica solo los campos que se envían (un `null` en un campo que no sea `ci` se ignora). `ci` con `null` o texto vacío lo borra. Si el cambio de **género o peso** afecta inscripciones: en un torneo en curso se rechaza (409) si el atleta deja de cumplir las reglas de su categoría; en un torneo en borrador, si el atleta deja de cumplir las reglas de la categoría hay que confirmar con `confirm_withdrawal=true`, y entonces se lo retira de ella (sin la confirmación responde 409 con las categorías afectadas y no cambia nada); en un torneo finalizado se permite y la inscripción no se toca. Requiere token.
+         */
+        patch: operations["update_athlete"];
         trace?: never;
     };
     "/api/v1/tournaments": {
@@ -155,9 +163,49 @@ export interface paths {
         head?: never;
         /**
          * Actualizar un torneo
-         * @description Modifica solo los campos que se envían (nombre, fecha, lugar o estado). Requiere token.
+         * @description Modifica solo los campos que se envían (nombre, fecha o lugar). El estado no se cambia acá: ver `start` y `finish`. Requiere token.
          */
         patch: operations["update_tournament"];
+        trace?: never;
+    };
+    "/api/v1/tournaments/{tournament_id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Iniciar un torneo
+         * @description Pasa el torneo de `draft` a `in_progress`: se cierran las inscripciones y la creación de categorías, y se pueden generar las llaves. Es irreversible. Requiere token.
+         */
+        post: operations["start_tournament"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tournaments/{tournament_id}/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finalizar un torneo
+         * @description Pasa el torneo de `in_progress` a `finished`: sus resultados quedan como definitivos. Exige que no queden combates por jugar: toda llave terminada, y toda categoría con 2 o más inscritos con su llave generada. Es irreversible. Requiere token.
+         */
+        post: operations["finish_tournament"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/categories": {
@@ -175,7 +223,7 @@ export interface paths {
         put?: never;
         /**
          * Crear una categoría
-         * @description Crea una categoría dentro de un torneo que ya existe. `min_age` no puede ser mayor que `max_age`, ni `min_weight` mayor que `max_weight` (responde 422). Si no se envía `discipline`, es `sparring`. Requiere token.
+         * @description Crea una categoría dentro de un torneo que ya existe. `min_age` no puede ser mayor que `max_age`, ni `min_weight` mayor que `max_weight` (responde 422). Si no se envía `discipline`, es `sparring`. Solo se pueden crear categorías mientras el torneo está en `draft` (responde 409 si ya empezó). Requiere token.
          */
         post: operations["create_category"];
         delete?: never;
@@ -219,10 +267,30 @@ export interface paths {
         put?: never;
         /**
          * Inscribir un atleta en una categoría
-         * @description Reglas: el género del atleta debe coincidir con el de la categoría (422); su peso debe estar dentro de `min_weight`/`max_weight` si la categoría los define (422); no puede inscribirse dos veces en la misma categoría (409) ni en más de una categoría del mismo torneo (409). Requiere token.
+         * @description Reglas: el torneo debe estar en `draft`: al pasar a `in_progress` las inscripciones se cierran (409); el género del atleta debe coincidir con el de la categoría (422); su peso debe estar dentro de `min_weight`/`max_weight` si la categoría los define (422); no puede inscribirse dos veces en la misma categoría (409) ni en más de una categoría del mismo torneo (409). Requiere token.
          */
         post: operations["create_registration"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/registrations/{registration_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Retirar a un atleta de una categoría
+         * @description Borra la inscripción. Solo mientras el torneo está en `draft`: con el torneo ya iniciado responde 409. Requiere token.
+         */
+        delete: operations["delete_registration"];
         options?: never;
         head?: never;
         patch?: never;
@@ -243,7 +311,7 @@ export interface paths {
         put?: never;
         /**
          * Generar la llave de una categoría
-         * @description Sortea al azar a los inscritos en una llave de eliminación simple. Si el número de inscritos no es potencia de 2, se reparten pases directos (`bye`) en la primera ronda. Hacen falta al menos 2 inscritos y solo se puede generar una llave por categoría. Requiere token.
+         * @description Sortea al azar a los inscritos en una llave de eliminación simple. Si el número de inscritos no es potencia de 2, se reparten pases directos (`bye`) en la primera ronda. Solo se genera con el torneo en curso (409 si todavía está en `draft` o ya terminó). Hacen falta al menos 2 inscritos y solo se puede generar una llave por categoría. Requiere token.
          */
         post: operations["create_bracket"];
         delete?: never;
@@ -283,7 +351,7 @@ export interface paths {
         put?: never;
         /**
          * Cargar el resultado de un round
-         * @description Gana el round el lado con más puntos; un round no puede terminar en empate (422). Cuando un atleta llega a `rounds_to_win` rounds ganados, el combate pasa a `finished` y su ganador avanza a la siguiente ronda. Requiere token.
+         * @description Solo se pueden cargar resultados con el torneo en curso (409). Solo se envían los puntos de cada lado: el servidor numera los rounds (1, 2, 3…) en el orden en que se cargan. Gana el round el lado con más puntos; un round no puede terminar en empate (422). Cuando un atleta llega a `rounds_to_win` rounds ganados, el combate pasa a `finished` y su ganador avanza a la siguiente ronda. Requiere token.
          */
         post: operations["create_round_score"];
         delete?: never;
@@ -325,6 +393,13 @@ export interface components {
              */
             name: string;
             /**
+             * Ci
+             * @description Cédula de identidad, opcional (hay niños que todavía no tienen). Si se informa: de 5 a 9 dígitos y, si corresponde, un complemento de 2 caracteres separado por guion; sin lugar de expedición. Se guarda sin espacios y en mayúsculas, y no puede repetirse. Si no tiene, se omite, o se envía `null` o texto vacío (la respuesta devuelve `null`).
+             * @example 1234567
+             * @example 1234567-1A
+             */
+            ci?: string | null;
+            /**
              * Birth Date
              * Format: date
              * @description Fecha de nacimiento (`YYYY-MM-DD`).
@@ -361,6 +436,13 @@ export interface components {
              */
             name: string;
             /**
+             * Ci
+             * @description Cédula de identidad, opcional (hay niños que todavía no tienen). Si se informa: de 5 a 9 dígitos y, si corresponde, un complemento de 2 caracteres separado por guion; sin lugar de expedición. Se guarda sin espacios y en mayúsculas, y no puede repetirse. Si no tiene, se omite, o se envía `null` o texto vacío (la respuesta devuelve `null`).
+             * @example 1234567
+             * @example 1234567-1A
+             */
+            ci?: string | null;
+            /**
              * Birth Date
              * Format: date
              * @description Fecha de nacimiento (`YYYY-MM-DD`).
@@ -394,6 +476,41 @@ export interface components {
             id: number;
             /** @description Club al que pertenece el atleta. */
             club: components["schemas"]["ClubRead"];
+        };
+        /** AthleteUpdate */
+        AthleteUpdate: {
+            /**
+             * Name
+             * @description Nuevo nombre. Si no se envía, no cambia.
+             */
+            name?: string | null;
+            /**
+             * Ci
+             * @description Nuevo CI, con el mismo formato que al crear. Si no se envía, no cambia; `null` o texto vacío lo borra.
+             */
+            ci?: string | null;
+            /**
+             * Birth Date
+             * @description Nueva fecha de nacimiento (`YYYY-MM-DD`). Si no se envía, no cambia.
+             */
+            birth_date?: string | null;
+            /** @description Nuevo género. Si no se envía, no cambia. Ver las reglas con inscripciones en la operación. */
+            gender?: components["schemas"]["Gender"] | null;
+            /**
+             * Belt Rank
+             * @description Nuevo cinturón o grado. Si no se envía, no cambia.
+             */
+            belt_rank?: string | null;
+            /**
+             * Weight Kg
+             * @description Nuevo peso en kilogramos. Si no se envía, no cambia. Ver las reglas con inscripciones en la operación.
+             */
+            weight_kg?: number | null;
+            /**
+             * Club Id
+             * @description Id del nuevo club, que debe existir. Si no se envía, no cambia.
+             */
+            club_id?: number | null;
         };
         /**
          * BeltGroup
@@ -588,6 +705,14 @@ export interface components {
              */
             id: number;
         };
+        /** ClubUpdate */
+        ClubUpdate: {
+            /**
+             * Name
+             * @description Nuevo nombre. No puede repetirse. Si no se envía, no cambia.
+             */
+            name?: string | null;
+        };
         /**
          * Discipline
          * @description Modalidad de la categoría. Hoy solo existe `sparring` (combate).
@@ -719,12 +844,6 @@ export interface components {
         /** RoundScoreCreate */
         RoundScoreCreate: {
             /**
-             * Round Number
-             * @description Número del round dentro del combate, desde 1. No se puede repetir.
-             * @example 1
-             */
-            round_number: number;
-            /**
              * Red Points
              * @description Puntos del lado rojo en este round.
              * @example 12
@@ -739,12 +858,6 @@ export interface components {
         };
         /** RoundScoreRead */
         RoundScoreRead: {
-            /**
-             * Round Number
-             * @description Número del round dentro del combate, desde 1. No se puede repetir.
-             * @example 1
-             */
-            round_number: number;
             /**
              * Red Points
              * @description Puntos del lado rojo en este round.
@@ -767,6 +880,12 @@ export interface components {
              * @description Id del combate al que pertenece el round.
              */
             match_id: number;
+            /**
+             * Round Number
+             * @description Número del round dentro del combate, desde 1. Lo asigna el servidor en el orden en que se cargan.
+             * @example 1
+             */
+            round_number: number;
             /**
              * Round Winner Id
              * @description Atleta que ganó el round: el del lado con más puntos.
@@ -846,8 +965,9 @@ export interface components {
         };
         /**
          * TournamentStatus
-         * @description Estado del torneo: `draft` (borrador, se arman categorías e inscripciones), `in_progress` (en curso)
-         *     y `finished` (finalizado).
+         * @description Estado del torneo: `draft` (borrador: se crean las categorías y se inscribe a los atletas),
+         *     `in_progress` (en curso: ya no se crean categorías ni se inscribe) y `finished` (finalizado). El estado
+         *     solo avanza en ese orden; no se vuelve a uno anterior.
          * @enum {string}
          */
         TournamentStatus: "draft" | "in_progress" | "finished";
@@ -868,8 +988,6 @@ export interface components {
              * @description Nuevo lugar. Si no se envía, no cambia.
              */
             location?: string | null;
-            /** @description Nuevo estado. Si no se envía, no cambia. */
-            status?: components["schemas"]["TournamentStatus"] | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1046,9 +1164,74 @@ export interface operations {
             };
         };
     };
-    list_athletes: {
+    update_club: {
         parameters: {
             query?: never;
+            header?: never;
+            path: {
+                club_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClubUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClubRead"];
+                };
+            };
+            /** @description No autenticado: falta el token de acceso, es inválido o venció. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El club no existe. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Ya existe otro club con ese nombre. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_athletes: {
+        parameters: {
+            query?: {
+                /** @description Texto a buscar en el nombre o en el CI. Si se omite o está vacío, devuelve todos. */
+                q?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1071,6 +1254,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1108,6 +1300,15 @@ export interface operations {
             };
             /** @description El club no existe. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Ya existe un atleta con ese CI. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1157,6 +1358,71 @@ export interface operations {
             };
             /** @description El atleta no existe. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_athlete: {
+        parameters: {
+            query?: {
+                /** @description Confirma que el atleta sea retirado de las categorías de torneos en borrador donde ya no encaja. */
+                confirm_withdrawal?: boolean;
+            };
+            header?: never;
+            path: {
+                athlete_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AthleteUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AthleteRead"];
+                };
+            };
+            /** @description No autenticado: falta el token de acceso, es inválido o venció. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El atleta o el club no existe. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Ya existe otro atleta con ese CI, el atleta dejaría de encajar en un torneo en curso, o falta confirmar el retiro de categorías. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1330,6 +1596,122 @@ export interface operations {
             };
         };
     };
+    start_tournament: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tournament_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentRead"];
+                };
+            };
+            /** @description No autenticado: falta el token de acceso, es inválido o venció. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El torneo no existe. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El torneo ya empezó. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    finish_tournament: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tournament_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentRead"];
+                };
+            };
+            /** @description No autenticado: falta el token de acceso, es inválido o venció. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El torneo no existe. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El torneo no está en curso, o quedan combates por jugar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_categories: {
         parameters: {
             query?: {
@@ -1394,6 +1776,15 @@ export interface operations {
             };
             /** @description El torneo no existe. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El torneo ya empezó, así que no admite más categorías. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1532,7 +1923,63 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description El atleta ya está inscrito en esa categoría o en otra del mismo torneo. */
+            /** @description Las inscripciones están cerradas (el torneo ya empezó), o el atleta ya está inscrito en esa categoría o en otra del mismo torneo. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_registration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                registration_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No autenticado: falta el token de acceso, es inválido o venció. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La inscripción no existe. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Las inscripciones están cerradas (el torneo ya empezó). */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -1639,7 +2086,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description La categoría ya tiene una llave. */
+            /** @description El torneo no está en curso, o la categoría ya tiene una llave. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -1750,7 +2197,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description El combate ya terminó, o ese número de round ya está cargado. */
+            /** @description El torneo no está en curso, o el combate ya terminó y no admite más rounds. */
             409: {
                 headers: {
                     [name: string]: unknown;
