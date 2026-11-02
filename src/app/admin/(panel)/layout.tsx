@@ -8,7 +8,10 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const navLinks = [{ href: "/admin", label: "Inicio" }];
+const navLinks = [
+  { href: "/admin", label: "Inicio" },
+  { href: "/admin/torneos", label: "Torneos" },
+];
 
 // No session check here: layouts don't re-render on navigation. Each page checks it through
 // `getAdminApi()` / `getAdminUsername()`, and `proxy.ts` already redirects requests without one.
