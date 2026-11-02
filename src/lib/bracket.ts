@@ -37,3 +37,20 @@ export function roundsWon(match: Match): { red: number; blue: number } {
         ).length;
   return { red: won(match.athlete_red_id), blue: won(match.athlete_blue_id) };
 }
+
+/** Pending matches with both athletes known, in the order they are fought: round by round. */
+export function matchesToScore(matches: Match[]): Match[] {
+  return matches
+    .filter(
+      (match) =>
+        match.status === "pending" &&
+        match.athlete_red_id !== null &&
+        match.athlete_blue_id !== null,
+    )
+    .toSorted((a, b) => a.round_number - b.round_number || a.slot - b.slot);
+}
+
+/** Matches still to be fought, counting those that wait for an earlier result. */
+export function pendingMatchCount(matches: Match[]): number {
+  return matches.filter((match) => match.status === "pending").length;
+}

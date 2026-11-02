@@ -56,12 +56,20 @@ async function AdminTournamentList() {
               {" · "}
               {tournament.location}
             </p>
-            <Link
-              href={`/torneos/${tournament.id}`}
-              className="w-fit text-sm text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-zinc-50"
-            >
-              Ver en el sitio público
-            </Link>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              <Link
+                href={`/admin/torneos/${tournament.id}`}
+                className="font-medium underline-offset-2 hover:underline"
+              >
+                Categorías y llaves →
+              </Link>
+              <Link
+                href={`/torneos/${tournament.id}`}
+                className="text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-zinc-50"
+              >
+                Ver en el sitio público
+              </Link>
+            </div>
           </div>
           <StatusAction tournament={tournament} />
         </li>
