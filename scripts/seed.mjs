@@ -1,13 +1,15 @@
 // Loads demo data into a LOCAL backend so every bracket state can be seen in the frontend:
 // finished, in progress and pending matches, byes, a two-athlete final and categories without
 // a bracket. Usage: `npm run seed` (backend running with `docker compose up` in ../Backend).
+// Follows the tournament lifecycle of API 0.5+: categories and registrations while in draft,
+// then `start`, then brackets and results, then `finish` when every match has been played.
 
 const API_URL = process.env.SEED_API_URL ?? "http://localhost:8000";
 const USERNAME = process.env.SEED_USERNAME ?? "admin";
 const PASSWORD = process.env.SEED_PASSWORD ?? "admin";
 const MARKER = "Copa de Prueba 2026";
 
-// The API has no DELETE endpoints, so seeding a shared server can't be undone.
+// The API can't delete tournaments, clubs or athletes, so seeding a shared server can't be undone.
 const host = new URL(API_URL).hostname;
 if (!["localhost", "127.0.0.1", "::1"].includes(host)) {
   console.error(
@@ -38,6 +40,23 @@ async function request(method, path, body) {
 
 const post = (path, body) => request("POST", path, body);
 const get = (path) => request("GET", path);
+
+// Right after `docker compose up` the container is running but the API is still applying
+// migrations, so wait for /health instead of failing with "fetch failed".
+async function waitForBackend(seconds = 60) {
+  for (let i = 0; i < seconds; i++) {
+    try {
+      if ((await fetch(`${API_URL}/health`)).ok) return;
+    } catch {
+      // Not accepting connections yet.
+    }
+    if (i === 0) console.log(`Esperando al backend en ${API_URL}…`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(
+    `No hay backend en ${API_URL}. Levantarlo con: cd ../Backend && docker compose up -d`,
+  );
+}
 
 async function login() {
   const response = await fetch(`${API_URL}/api/v1/auth/login`, {
@@ -122,11 +141,14 @@ async function createCategory(tournamentId, clubs, spec) {
       category_id: category.id,
     });
   }
-  if (spec.matchesToPlay !== undefined) {
-    await post(`/api/v1/categories/${category.id}/bracket`);
-    await playMatches(category.id, spec.matchesToPlay);
-  }
   return category;
+}
+
+/** Brackets and results are only accepted once the tournament is in progress. */
+async function playCategory(categoryId, spec) {
+  if (spec.matchesToPlay === undefined) return;
+  await post(`/api/v1/categories/${categoryId}/bracket`);
+  await playMatches(categoryId, spec.matchesToPlay);
 }
 
 // Score patterns per round so results look varied: [red, blue] points.
@@ -163,9 +185,9 @@ async function playMatches(categoryId, count) {
       .sort((a, b) => a.round_number - b.round_number || a.slot - b.slot)[0];
     if (!next) return;
     const pattern = SCORE_PATTERNS[next.id % SCORE_PATTERNS.length];
-    for (const [index, [red_points, blue_points]] of pattern.entries()) {
+    // The server numbers the rounds in the order they are posted.
+    for (const [red_points, blue_points] of pattern) {
       await post(`/api/v1/matches/${next.id}/rounds`, {
-        round_number: index + 1,
         red_points,
         blue_points,
       });
@@ -275,11 +297,17 @@ const TOURNAMENTS = [
       location: "Sacaba, Cochabamba",
     },
     status: "draft",
-    categories: [],
+    categories: [
+      {
+        category: { ...cadete, weight_label: "Hasta 45kg", max_weight: 45 },
+        athletes: 3,
+      },
+    ],
   },
 ];
 
 async function main() {
+  await waitForBackend();
   await login();
   const existing = await get("/api/v1/tournaments");
   if (existing.some((t) => t.name === MARKER)) {
@@ -302,13 +330,18 @@ async function main() {
 
   for (const spec of TOURNAMENTS) {
     const tournament = await post("/api/v1/tournaments", spec.tournament);
+    const categories = [];
     for (const categorySpec of spec.categories) {
-      await createCategory(tournament.id, clubs, categorySpec);
+      categories.push(await createCategory(tournament.id, clubs, categorySpec));
     }
     if (spec.status !== "draft") {
-      await request("PATCH", `/api/v1/tournaments/${tournament.id}`, {
-        status: spec.status,
-      });
+      await post(`/api/v1/tournaments/${tournament.id}/start`);
+      for (const [index, categorySpec] of spec.categories.entries()) {
+        await playCategory(categories[index].id, categorySpec);
+      }
+    }
+    if (spec.status === "finished") {
+      await post(`/api/v1/tournaments/${tournament.id}/finish`);
     }
     console.log(
       `✓ ${tournament.name} (${spec.categories.length} categorías) → /torneos/${tournament.id}`,
@@ -318,10 +351,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error.message);
-  if (error.cause?.code === "ECONNREFUSED") {
-    console.error(
-      `No hay backend en ${API_URL}. Levantarlo con: cd ../Backend && docker compose up`,
-    );
-  }
   process.exit(1);
 });

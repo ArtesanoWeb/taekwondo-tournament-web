@@ -44,10 +44,11 @@ datos o lanza un `ApiError` con el mensaje en español.
 ### Backend local con datos de prueba
 
 El servidor dev es compartido y lento al despertar; para desarrollar conviene el backend en local
-(requiere Docker). Con el repositorio del backend clonado en `../Backend`:
+(requiere Docker). Con el repositorio del backend clonado en `../Backend`, en la rama `dev` (desde la
+API 0.5):
 
 ```bash
-cd ../Backend && docker compose up -d     # API en http://localhost:8000 (admin/admin)
+cd ../Backend && git pull && docker compose up -d --build   # API en http://localhost:8000 (admin/admin)
 cd ../Frontend
 echo "API_URL=http://localhost:8000" > .env.local
 npm run seed                              # carga torneos, categorías y llaves de prueba
@@ -55,9 +56,13 @@ npm run dev
 ```
 
 `npm run seed` crea tres torneos (en curso, finalizado y en borrador) con llaves en todos los estados:
-a medio jugar, con pases directos, con campeón, de 2 a 16 atletas y categorías sin llave. Solo
-funciona contra un backend local (la API no permite borrar datos) y no duplica nada si se corre dos
-veces. Para empezar de cero: `cd ../Backend && docker compose down -v && docker compose up -d`.
+a medio jugar, con pases directos, con campeón, de 2 a 16 atletas y categorías sin llave. Sigue el ciclo
+de vida de la API: crea categorías e inscripciones con el torneo en borrador, lo inicia
+(`POST /tournaments/{id}/start`), genera las llaves y carga los resultados, y finaliza
+(`POST /tournaments/{id}/finish`) el torneo que tiene todas sus llaves jugadas. Solo funciona contra
+un backend local (la API no permite borrar torneos ni atletas) y no duplica nada si se corre dos veces.
+Para empezar de cero, por ejemplo con datos de un seed anterior:
+`cd ../Backend && docker compose down -v && docker compose up -d`.
 
 No hace falta configurar CORS ni un proxy: el navegador nunca llama a la API, la pide el servidor de
 Next.
@@ -83,8 +88,13 @@ En [Vercel](https://vercel.com), conectado a este repositorio:
 
 | Rama                                | Despliegue                                                   | `API_URL`                                               |
 | ----------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
-| `main`                              | **Production** (la versión publicada)                        | `https://taekwondo-tournament-manager.onrender.com`     |
+| `main`                              | **Production** (la versión publicada)                        | `https://taekwondo-tournament-manager-dev.onrender.com` |
 | `develop`, `feature/*`, `release/*` | **Preview**: una URL de prueba por push, enlazada en cada PR | `https://taekwondo-tournament-manager-dev.onrender.com` |
+
+Por ahora los dos ambientes leen del backend **dev**, acordado con el equipo del backend: así el sitio
+publicado se prueba con los datos y los cambios que el backend está desarrollando. El backend de
+producción (`https://taekwondo-tournament-manager.onrender.com`) queda para cuando el torneo se use de
+verdad; para volver a él basta cambiar `API_URL` del ambiente Production en Vercel y redesplegar.
 
 Publicar en producción es hacer un release (ver Git Flow abajo): al mergear `release/X.Y.Z` en
 `main`, Vercel despliega solo. No hace falta CORS en el backend porque la API se pide desde el
@@ -95,7 +105,9 @@ servidor de Next, no desde el navegador.
 El backlog y los sprints viven en el
 [GitHub Project](https://github.com/users/ArtesanoWeb/projects/1). Cada cambio referencia su issue
 (`Closes #N`) y debe cumplir la _Definition of Done_: funciona contra la API, textos en español,
-estados de carga y error, usable en celular, lint y build en verde, mergeado en `develop`.
+estados de carga y error, lint y build en verde, mergeado en `develop`. La vista pública se usa sobre
+todo desde el celular: se diseña primero para celular y se verifica a 390 px. El admin se usa en
+celular y en PC: se verifica a 390 px y a 1280 px.
 
 ### Flujo de ramas (Git Flow)
 

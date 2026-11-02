@@ -7,6 +7,7 @@ import { api, attempt } from "@/lib/api/client";
 import { formatAgeRange } from "@/lib/categories";
 import { formatDateTime } from "@/lib/format";
 import { beltGroupLabels, genderLabels } from "@/lib/labels";
+import { isPublic } from "@/lib/tournaments";
 
 export async function CategoryBracket({
   params,
@@ -32,6 +33,8 @@ export async function CategoryBracket({
       params: { path: { tournament_id: category.data.tournament_id } },
     }),
   );
+  // Categories of a draft tournament stay hidden, like the tournament itself.
+  if (tournament.ok && !isPublic(tournament.data.status)) notFound();
 
   return (
     <>

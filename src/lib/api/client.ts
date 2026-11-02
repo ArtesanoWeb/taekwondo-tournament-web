@@ -21,7 +21,7 @@ export function createApiClient(token?: string) {
 
 export const api = createApiClient();
 
-type ApiResult<T> = { data?: T; error?: unknown; response: Response };
+export type ApiResult<T> = { data?: T; error?: unknown; response: Response };
 
 export type Result<T> = { ok: true; data: T } | { ok: false; error: ApiError };
 

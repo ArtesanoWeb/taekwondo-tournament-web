@@ -7,6 +7,40 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+
+Administración en vivo: el admin inicia sesión, inicia y finaliza torneos, genera las llaves y anota
+cada round desde el celular; el sitio público muestra los torneos en curso y finalizados (Sprint 4).
+
+### Added
+
+- Administración: inicio de sesión en `/admin/login` y panel en `/admin`. La sesión se guarda en una
+  cookie `httpOnly`; sin sesión, las páginas del admin llevan al login y después vuelven a la página
+  pedida; si la sesión vence aparece "Tu sesión venció"; botón "Cerrar sesión" (#39).
+- Administración: `/admin/torneos` lista todos los torneos, incluidos los borradores, con botones
+  "Iniciar torneo" y "Finalizar torneo" que piden confirmación porque no se pueden deshacer; si la
+  API rechaza el cambio (por ejemplo, quedan combates por jugar) se muestra su motivo (#40).
+- Administración en vivo: cada torneo muestra sus categorías con inscritos y estado de la llave; en
+  cada categoría, "Generar llave" con confirmación y, con el torneo en curso, los combates listos
+  para anotar. Formulario de round pensado para el celular (inputs numéricos grandes), sin
+  empates ni puntos inválidos y con confirmación porque el round no se puede editar; el marcador y
+  la llave se actualizan al guardar y el ganador avanza solo (#41).
+
+### Changed
+
+- Para desarrollo: `npm run seed` funciona con la API 0.5 (inicia y finaliza los torneos con
+  `start`/`finish`, ya no envía `round_number`), tipos de la API regenerados y Next 16.4.3 /
+  React 19.3.1 (#37).
+- El sitio publicado lee los datos de la API de desarrollo del backend, que ya tiene las acciones
+  de administración (#38).
+- La portada separa los torneos "En curso" de los "Finalizados" con una línea divisoria, cada grupo
+  del más reciente al más antiguo. Los torneos en borrador ya no aparecen en el sitio público: ni en
+  la lista ni por URL (su página y las de sus categorías muestran "no encontrado") (#42).
+
+### Known issues
+
+- En el celular la llave se recorre con scroll horizontal; una vista optimizada llega con el #28.
+
 ## [0.2.0] - 2026-10-26
 
 Del torneo a la llave: ya se puede entrar a un torneo, elegir una categoría y seguir su llave
@@ -55,6 +89,7 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.2.0...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.3.0...develop
+[0.3.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/releases/tag/v0.1.0

@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import type { Match } from "@/lib/api/types";
 
-import { groupRounds, roundName, roundsWon } from "./bracket";
+import {
+  groupRounds,
+  matchesToScore,
+  pendingMatchCount,
+  roundName,
+  roundsWon,
+} from "./bracket";
 
 const match = (
   id: number,
@@ -85,5 +91,31 @@ describe("roundsWon", () => {
         }),
       ),
     ).toEqual({ red: 2, blue: 1 });
+  });
+});
+
+describe("matchesToScore", () => {
+  it("keeps pending matches with both sides known, round by round", () => {
+    const both = { athlete_red_id: 1, athlete_blue_id: 2 };
+    const matches = [
+      match(1, 2, 0, both),
+      match(2, 1, 1, both),
+      match(3, 1, 0, both),
+      match(4, 1, 2, { ...both, status: "finished", winner_id: 1 }),
+      match(5, 1, 3, { athlete_red_id: 1, status: "bye", winner_id: 1 }),
+      match(6, 2, 1, { athlete_red_id: 1 }),
+    ];
+    expect(matchesToScore(matches).map((m) => m.id)).toEqual([3, 2, 1]);
+  });
+});
+
+describe("pendingMatchCount", () => {
+  it("counts pending matches, including those waiting for a result", () => {
+    const matches = [
+      match(1, 1, 0, { status: "finished" }),
+      match(2, 1, 1, { status: "bye" }),
+      match(3, 2, 0),
+    ];
+    expect(pendingMatchCount(matches)).toBe(1);
   });
 });
