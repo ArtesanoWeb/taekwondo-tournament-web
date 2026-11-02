@@ -15,6 +15,11 @@ desarrollo inicial y puede cambiar entre versiones.
 - Administración: `/admin/torneos` lista todos los torneos, incluidos los borradores, con botones
   "Iniciar torneo" y "Finalizar torneo" que piden confirmación porque no se pueden deshacer; si la
   API rechaza el cambio (por ejemplo, quedan combates por jugar) se muestra su motivo (#40).
+- Administración en vivo: cada torneo muestra sus categorías con inscritos y estado de la llave; en
+  cada categoría, "Generar llave" con confirmación y, con el torneo en curso, los combates listos
+  para anotar. Formulario de round pensado para el celular (inputs numéricos grandes), sin
+  empates ni puntos inválidos y con confirmación porque el round no se puede editar; el marcador y
+  la llave se actualizan al guardar y el ganador avanza solo (#41).
 
 ### Changed
 
