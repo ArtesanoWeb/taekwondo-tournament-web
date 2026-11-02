@@ -12,6 +12,9 @@ desarrollo inicial y puede cambiar entre versiones.
 - Administración: inicio de sesión en `/admin/login` y panel en `/admin`. La sesión se guarda en una
   cookie `httpOnly`; sin sesión, las páginas del admin llevan al login y después vuelven a la página
   pedida; si la sesión vence aparece "Tu sesión venció"; botón "Cerrar sesión" (#39).
+- Administración: `/admin/torneos` lista todos los torneos, incluidos los borradores, con botones
+  "Iniciar torneo" y "Finalizar torneo" que piden confirmación porque no se pueden deshacer; si la
+  API rechaza el cambio (por ejemplo, quedan combates por jugar) se muestra su motivo (#40).
 
 ### Changed
 

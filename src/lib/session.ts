@@ -1,5 +1,6 @@
 import "server-only";
 
+import { io } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -49,6 +50,8 @@ export async function getAdminUsername(): Promise<string> {
 
 async function requireToken(): Promise<string> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  // Comparing `exp` with the clock must happen per request, not in a prerender (Cache Components).
+  await io();
   if (!token || isTokenExpired(token)) redirect(loginUrl({ expired: !!token }));
   return token;
 }
