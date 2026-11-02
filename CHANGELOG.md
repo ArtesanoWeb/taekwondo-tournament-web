@@ -7,6 +7,11 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+
+Administración en vivo: el admin inicia sesión, inicia y finaliza torneos, genera las llaves y anota
+cada round desde el celular; el sitio público muestra los torneos en curso y finalizados (Sprint 4).
+
 ### Added
 
 - Administración: inicio de sesión en `/admin/login` y panel en `/admin`. La sesión se guarda en una
@@ -26,9 +31,15 @@ desarrollo inicial y puede cambiar entre versiones.
 - Para desarrollo: `npm run seed` funciona con la API 0.5 (inicia y finaliza los torneos con
   `start`/`finish`, ya no envía `round_number`), tipos de la API regenerados y Next 16.4.3 /
   React 19.3.1 (#37).
+- El sitio publicado lee los datos de la API de desarrollo del backend, que ya tiene las acciones
+  de administración (#38).
 - La portada separa los torneos "En curso" de los "Finalizados" con una línea divisoria, cada grupo
   del más reciente al más antiguo. Los torneos en borrador ya no aparecen en el sitio público: ni en
   la lista ni por URL (su página y las de sus categorías muestran "no encontrado") (#42).
+
+### Known issues
+
+- En el celular la llave se recorre con scroll horizontal; una vista optimizada llega con el #28.
 
 ## [0.2.0] - 2026-10-26
 
@@ -78,6 +89,7 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.2.0...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.3.0...develop
+[0.3.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/releases/tag/v0.1.0
