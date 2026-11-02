@@ -26,6 +26,9 @@ desarrollo inicial y puede cambiar entre versiones.
 - Para desarrollo: `npm run seed` funciona con la API 0.5 (inicia y finaliza los torneos con
   `start`/`finish`, ya no envía `round_number`), tipos de la API regenerados y Next 16.4.3 /
   React 19.3.1 (#37).
+- La portada separa los torneos "En curso" de los "Finalizados" con una línea divisoria, cada grupo
+  del más reciente al más antiguo. Los torneos en borrador ya no aparecen en el sitio público: ni en
+  la lista ni por URL (su página y las de sus categorías muestran "no encontrado") (#42).
 
 ## [0.2.0] - 2026-10-26
 
