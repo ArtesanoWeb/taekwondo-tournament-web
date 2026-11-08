@@ -6,6 +6,7 @@ import { ErrorNotice } from "@/components/error-notice";
 import { LoadingNotice } from "@/components/loading-notice";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { formatDate } from "@/lib/format";
+import { countAthletesByTournament } from "@/lib/registrations";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 import { sortByMostRecent } from "@/lib/tournaments";
 
@@ -36,11 +37,16 @@ async function AdminTournamentList({
   searchParams,
 }: Pick<PageProps<"/admin/torneos">, "searchParams">) {
   const api = await getAdminApi();
-  const [result, { creado }] = await Promise.all([
+  const [result, registrations, { creado }] = await Promise.all([
     adminAttempt(api.GET("/api/v1/tournaments")),
+    adminAttempt(api.GET("/api/v1/registrations")),
     searchParams,
   ]);
   if (!result.ok) return <ErrorNotice message={result.error.message} />;
+  if (!registrations.ok) {
+    return <ErrorNotice message={registrations.error.message} />;
+  }
+  const athleteCounts = countAthletesByTournament(registrations.data);
 
   // `?creado=<id>` comes from the "Nuevo torneo" form: confirm it and highlight the new one.
   const createdId = Number(creado);
@@ -89,10 +95,17 @@ async function AdminTournamentList({
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
                 {tournament.location}
               </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {formatAthleteCount(athleteCounts.get(tournament.id) ?? 0)}
+              </p>
             </Link>
           </li>
         ))}
       </ul>
     </div>
   );
+}
+
+function formatAthleteCount(count: number): string {
+  return count === 1 ? "1 atleta" : `${count} atletas`;
 }

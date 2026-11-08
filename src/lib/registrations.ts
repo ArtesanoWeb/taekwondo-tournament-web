@@ -13,3 +13,17 @@ export function sortByAthleteName(
 export function canWithdraw(status: TournamentStatus): boolean {
   return status === "draft";
 }
+
+/** Registrations per tournament. The API allows an athlete only one category per tournament. */
+export function countAthletesByTournament(
+  registrations: Registration[],
+): Map<number, number> {
+  const counts = new Map<number, number>();
+  for (const { category } of registrations) {
+    counts.set(
+      category.tournament_id,
+      (counts.get(category.tournament_id) ?? 0) + 1,
+    );
+  }
+  return counts;
+}

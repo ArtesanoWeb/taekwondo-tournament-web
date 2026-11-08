@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import type { Registration } from "@/lib/api/types";
 
-import { canWithdraw, sortByAthleteName } from "./registrations";
+import {
+  canWithdraw,
+  countAthletesByTournament,
+  sortByAthleteName,
+} from "./registrations";
 
 const registration = (id: number, name: string) =>
   ({ id, athlete: { name } }) as Registration;
@@ -26,5 +30,20 @@ describe("canWithdraw", () => {
     expect(canWithdraw("draft")).toBe(true);
     expect(canWithdraw("in_progress")).toBe(false);
     expect(canWithdraw("finished")).toBe(false);
+  });
+});
+
+describe("countAthletesByTournament", () => {
+  it("adds up the registrations of every category of each tournament", () => {
+    const inTournament = (tournament_id: number) =>
+      ({ category: { tournament_id } }) as Registration;
+    const counts = countAthletesByTournament([
+      inTournament(1),
+      inTournament(2),
+      inTournament(1),
+    ]);
+    expect(counts.get(1)).toBe(2);
+    expect(counts.get(2)).toBe(1);
+    expect(counts.get(3)).toBeUndefined();
   });
 });
