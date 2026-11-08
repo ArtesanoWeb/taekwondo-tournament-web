@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 const navLinks = [
   { href: "/admin", label: "Inicio" },
   { href: "/admin/torneos", label: "Torneos" },
+  { href: "/admin/atletas", label: "Atletas" },
 ];
 
 // No session check here: layouts don't re-render on navigation. Each page checks it through

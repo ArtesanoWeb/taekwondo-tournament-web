@@ -2,7 +2,8 @@
 
 import { useActionState, useRef } from "react";
 
-import { ConfirmDialog, primaryButtonClass } from "@/components/confirm-dialog";
+import { primaryButtonClass } from "@/components/button-classes";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FormError } from "@/components/form-error";
 import type { Tournament } from "@/lib/api/types";
 
