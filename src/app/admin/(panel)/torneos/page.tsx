@@ -9,8 +9,6 @@ import { formatDate } from "@/lib/format";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 import { sortByMostRecent } from "@/lib/tournaments";
 
-import { StatusAction } from "./status-action";
-
 export const metadata: Metadata = { title: "Torneos" };
 
 export default function AdminTournamentsPage({
@@ -69,15 +67,16 @@ async function AdminTournamentList({
       )}
       <ul className="flex flex-col gap-3">
         {sortByMostRecent(result.data).map((tournament) => (
-          <li
-            key={tournament.id}
-            className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-start sm:justify-between ${
-              tournament.id === created?.id
-                ? "border-emerald-400 ring-2 ring-emerald-400/30 dark:border-emerald-600"
-                : "border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <div className="flex min-w-0 flex-col gap-1">
+          <li key={tournament.id}>
+            {/* The whole card is the link: on a phone there's no hover and small targets are hard to hit. */}
+            <Link
+              href={`/admin/torneos/${tournament.id}`}
+              className={`flex flex-col gap-1 rounded-lg border p-4 transition-colors hover:bg-zinc-50 active:bg-zinc-100 dark:hover:bg-zinc-900 dark:active:bg-zinc-800 ${
+                tournament.id === created?.id
+                  ? "border-emerald-400 ring-2 ring-emerald-400/30 dark:border-emerald-600"
+                  : "border-zinc-200 dark:border-zinc-800"
+              }`}
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-semibold">{tournament.name}</h2>
                 <TournamentStatusBadge status={tournament.status} />
@@ -89,22 +88,7 @@ async function AdminTournamentList({
                 {" · "}
                 {tournament.location}
               </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                <Link
-                  href={`/admin/torneos/${tournament.id}`}
-                  className="font-medium underline-offset-2 hover:underline"
-                >
-                  Categorías y llaves →
-                </Link>
-                <Link
-                  href={`/torneos/${tournament.id}`}
-                  className="text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-zinc-50"
-                >
-                  Ver en el sitio público
-                </Link>
-              </div>
-            </div>
-            <StatusAction tournament={tournament} />
+            </Link>
           </li>
         ))}
       </ul>
