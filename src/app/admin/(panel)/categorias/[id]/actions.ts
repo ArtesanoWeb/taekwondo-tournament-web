@@ -28,6 +28,35 @@ export async function generateBracket(
   return {};
 }
 
+export type WithdrawState = { error?: string };
+
+/** Removes an athlete from a category. Only while the tournament is a draft (else the API says 409). */
+export async function withdrawRegistration(
+  _previous: WithdrawState,
+  formData: FormData,
+): Promise<WithdrawState> {
+  const registrationId = Number(formData.get("registrationId"));
+  if (!Number.isInteger(registrationId)) {
+    return { error: "No se pudo identificar la inscripción." };
+  }
+
+  const api = await getAdminApi();
+  const result = await adminAttempt(
+    api.DELETE("/api/v1/registrations/{registration_id}", {
+      params: { path: { registration_id: registrationId } },
+    }),
+  );
+  if (!result.ok) {
+    // 409 when the tournament was started meanwhile (e.g. from another phone): re-render so the
+    // page shows the real status and the "Retirar" buttons go away; the message stays visible.
+    if (result.error.status === 409) refresh();
+    return { error: result.error.message };
+  }
+
+  refresh();
+  return {};
+}
+
 /** The typed values come back on error so the form doesn't lose them. */
 export type RoundState = { error?: string; red?: string; blue?: string };
 

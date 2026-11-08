@@ -9,10 +9,12 @@ import type { Bracket, Category, TournamentStatus } from "@/lib/api/types";
 import { groupRounds, matchesToScore, pendingMatchCount } from "@/lib/bracket";
 import { formatAgeRange } from "@/lib/categories";
 import { genderLabels } from "@/lib/labels";
+import { canWithdraw, sortByAthleteName } from "@/lib/registrations";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
 import { GenerateBracket } from "./generate-bracket";
 import { MatchScoreForm } from "./match-score-form";
+import { RegistrationList } from "./registration-list";
 
 export default function AdminCategoryPage({
   params,
@@ -109,6 +111,14 @@ async function AdminCategory({
             : "La llave todavía no fue sorteada."}
         </p>
       )}
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xl font-semibold">Inscritos</h2>
+        <RegistrationList
+          registrations={sortByAthleteName(registrations.data)}
+          canWithdraw={canWithdraw(status)}
+        />
+      </section>
     </>
   );
 }
