@@ -49,6 +49,8 @@ export async function unwrap<T>(request: Promise<ApiResult<T>>): Promise<T> {
     throw networkError(cause);
   }
   const { data, error, response } = result;
+  // 204 No Content (e.g. DELETE) is a success without a body: openapi-fetch gives `data: undefined`.
+  if (response.status === 204) return data as T;
   if (!response.ok || data === undefined) {
     throw new ApiError(
       response.status,
