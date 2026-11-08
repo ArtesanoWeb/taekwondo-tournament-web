@@ -108,6 +108,9 @@ El backlog y los sprints viven en el
 estados de carga y error, lint y build en verde, mergeado en `develop`. La vista pública se usa sobre
 todo desde el celular: se diseña primero para celular y se verifica a 390 px. El admin se usa en
 celular y en PC: se verifica a 390 px y a 1280 px.
+Además: toda acción relevante o destructiva pide confirmación; en el celular los campos numéricos
+abren el teclado numérico (`inputMode`); y la vista pública nunca muestra datos personales de los
+atletas, solo su nombre (hay menores de edad).
 
 ### Flujo de ramas (Git Flow)
 
