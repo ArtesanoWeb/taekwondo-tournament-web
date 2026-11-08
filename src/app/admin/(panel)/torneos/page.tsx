@@ -6,10 +6,9 @@ import { ErrorNotice } from "@/components/error-notice";
 import { LoadingNotice } from "@/components/loading-notice";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { formatDate } from "@/lib/format";
+import { countAthletesByTournament } from "@/lib/registrations";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 import { sortByMostRecent } from "@/lib/tournaments";
-
-import { StatusAction } from "./status-action";
 
 export const metadata: Metadata = { title: "Torneos" };
 
@@ -38,11 +37,16 @@ async function AdminTournamentList({
   searchParams,
 }: Pick<PageProps<"/admin/torneos">, "searchParams">) {
   const api = await getAdminApi();
-  const [result, { creado }] = await Promise.all([
+  const [result, registrations, { creado }] = await Promise.all([
     adminAttempt(api.GET("/api/v1/tournaments")),
+    adminAttempt(api.GET("/api/v1/registrations")),
     searchParams,
   ]);
   if (!result.ok) return <ErrorNotice message={result.error.message} />;
+  if (!registrations.ok) {
+    return <ErrorNotice message={registrations.error.message} />;
+  }
+  const athleteCounts = countAthletesByTournament(registrations.data);
 
   // `?creado=<id>` comes from the "Nuevo torneo" form: confirm it and highlight the new one.
   const createdId = Number(creado);
@@ -69,15 +73,16 @@ async function AdminTournamentList({
       )}
       <ul className="flex flex-col gap-3">
         {sortByMostRecent(result.data).map((tournament) => (
-          <li
-            key={tournament.id}
-            className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-start sm:justify-between ${
-              tournament.id === created?.id
-                ? "border-emerald-400 ring-2 ring-emerald-400/30 dark:border-emerald-600"
-                : "border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <div className="flex min-w-0 flex-col gap-1">
+          <li key={tournament.id}>
+            {/* The whole card is the link: on a phone there's no hover and small targets are hard to hit. */}
+            <Link
+              href={`/admin/torneos/${tournament.id}`}
+              className={`flex flex-col gap-1 rounded-lg border p-4 transition-colors hover:bg-zinc-50 active:bg-zinc-100 dark:hover:bg-zinc-900 dark:active:bg-zinc-800 ${
+                tournament.id === created?.id
+                  ? "border-emerald-400 ring-2 ring-emerald-400/30 dark:border-emerald-600"
+                  : "border-zinc-200 dark:border-zinc-800"
+              }`}
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-semibold">{tournament.name}</h2>
                 <TournamentStatusBadge status={tournament.status} />
@@ -86,28 +91,21 @@ async function AdminTournamentList({
                 <time dateTime={tournament.date}>
                   {formatDate(tournament.date)}
                 </time>
-                {" · "}
+              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
                 {tournament.location}
               </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                <Link
-                  href={`/admin/torneos/${tournament.id}`}
-                  className="font-medium underline-offset-2 hover:underline"
-                >
-                  Categorías y llaves →
-                </Link>
-                <Link
-                  href={`/torneos/${tournament.id}`}
-                  className="text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-zinc-50"
-                >
-                  Ver en el sitio público
-                </Link>
-              </div>
-            </div>
-            <StatusAction tournament={tournament} />
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {formatAthleteCount(athleteCounts.get(tournament.id) ?? 0)}
+              </p>
+            </Link>
           </li>
         ))}
       </ul>
     </div>
   );
+}
+
+function formatAthleteCount(count: number): string {
+  return count === 1 ? "1 atleta" : `${count} atletas`;
 }

@@ -20,6 +20,15 @@ export default function AdminHome() {
           Ver todos los torneos, iniciarlos y finalizarlos.
         </span>
       </Link>
+      <Link
+        href="/admin/atletas"
+        className="mt-2 flex flex-col gap-1 rounded-lg border border-zinc-200 p-4 transition-colors hover:border-zinc-400 sm:max-w-sm dark:border-zinc-800 dark:hover:border-zinc-600"
+      >
+        <span className="font-semibold">Atletas →</span>
+        <span className="text-sm text-zinc-600 dark:text-zinc-400">
+          Buscar, crear y editar atletas.
+        </span>
+      </Link>
     </div>
   );
 }

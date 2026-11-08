@@ -2,10 +2,8 @@
 
 import { useActionState, useRef } from "react";
 
-import {
-  ConfirmDialog,
-  secondaryButtonClass,
-} from "@/components/confirm-dialog";
+import { secondaryButtonClass } from "@/components/button-classes";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FormError } from "@/components/form-error";
 import type { Registration } from "@/lib/api/types";
 
