@@ -85,7 +85,8 @@ async function AdminTournamentList({
                 <time dateTime={tournament.date}>
                   {formatDate(tournament.date)}
                 </time>
-                {" · "}
+              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
                 {tournament.location}
               </p>
             </Link>
