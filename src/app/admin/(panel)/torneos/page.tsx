@@ -13,21 +13,40 @@ import { StatusAction } from "./status-action";
 
 export const metadata: Metadata = { title: "Torneos" };
 
-export default function AdminTournamentsPage() {
+export default function AdminTournamentsPage({
+  searchParams,
+}: PageProps<"/admin/torneos">) {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Torneos</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">Torneos</h1>
+        <Link
+          href="/admin/torneos/nuevo"
+          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          Nuevo torneo
+        </Link>
+      </div>
       <Suspense fallback={<LoadingNotice label="Cargando torneos…" />}>
-        <AdminTournamentList />
+        <AdminTournamentList searchParams={searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function AdminTournamentList() {
+async function AdminTournamentList({
+  searchParams,
+}: Pick<PageProps<"/admin/torneos">, "searchParams">) {
   const api = await getAdminApi();
-  const result = await adminAttempt(api.GET("/api/v1/tournaments"));
+  const [result, { creado }] = await Promise.all([
+    adminAttempt(api.GET("/api/v1/tournaments")),
+    searchParams,
+  ]);
   if (!result.ok) return <ErrorNotice message={result.error.message} />;
+
+  // `?creado=<id>` comes from the "Nuevo torneo" form: confirm it and highlight the new one.
+  const createdId = Number(creado);
+  const created = result.data.find((t) => t.id === createdId);
 
   if (result.data.length === 0) {
     return (
@@ -38,42 +57,57 @@ async function AdminTournamentList() {
   }
 
   return (
-    <ul className="flex flex-col gap-3">
-      {sortByMostRecent(result.data).map((tournament) => (
-        <li
-          key={tournament.id}
-          className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 sm:flex-row sm:items-start sm:justify-between dark:border-zinc-800"
+    <div className="flex flex-col gap-4">
+      {created && (
+        <p
+          role="status"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
         >
-          <div className="flex min-w-0 flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-semibold">{tournament.name}</h2>
-              <TournamentStatusBadge status={tournament.status} />
+          Torneo creado: <span className="font-medium">{created.name}</span>. Ya
+          puedes preparar sus categorías e inscripciones.
+        </p>
+      )}
+      <ul className="flex flex-col gap-3">
+        {sortByMostRecent(result.data).map((tournament) => (
+          <li
+            key={tournament.id}
+            className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-start sm:justify-between ${
+              tournament.id === created?.id
+                ? "border-emerald-400 ring-2 ring-emerald-400/30 dark:border-emerald-600"
+                : "border-zinc-200 dark:border-zinc-800"
+            }`}
+          >
+            <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-semibold">{tournament.name}</h2>
+                <TournamentStatusBadge status={tournament.status} />
+              </div>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <time dateTime={tournament.date}>
+                  {formatDate(tournament.date)}
+                </time>
+                {" · "}
+                {tournament.location}
+              </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                <Link
+                  href={`/admin/torneos/${tournament.id}`}
+                  className="font-medium underline-offset-2 hover:underline"
+                >
+                  Categorías y llaves →
+                </Link>
+                <Link
+                  href={`/torneos/${tournament.id}`}
+                  className="text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-zinc-50"
+                >
+                  Ver en el sitio público
+                </Link>
+              </div>
             </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              <time dateTime={tournament.date}>
-                {formatDate(tournament.date)}
-              </time>
-              {" · "}
-              {tournament.location}
-            </p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              <Link
-                href={`/admin/torneos/${tournament.id}`}
-                className="font-medium underline-offset-2 hover:underline"
-              >
-                Categorías y llaves →
-              </Link>
-              <Link
-                href={`/torneos/${tournament.id}`}
-                className="text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-zinc-50"
-              >
-                Ver en el sitio público
-              </Link>
-            </div>
-          </div>
-          <StatusAction tournament={tournament} />
-        </li>
-      ))}
-    </ul>
+            <StatusAction tournament={tournament} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
