@@ -102,8 +102,11 @@ servidor de Next, no desde el navegador.
 
 ## Cómo se trabaja
 
-El backlog y los sprints viven en el
-[GitHub Project](https://github.com/users/ArtesanoWeb/projects/1). Cada cambio referencia su issue
+El backlog vive en el [GitHub Project](https://github.com/users/ArtesanoWeb/projects/1) y se trabaja
+en flujo continuo (Kanban): Backlog → Ready → In progress → In review → Done, con como mucho 2 issues
+en curso a la vez y en orden de prioridad (Must, Should, Could). Los issues se agrupan en
+[hitos](https://github.com/ArtesanoWeb/taekwondo-tournament-web/milestones), uno por versión y con un
+objetivo, sin fecha: cuando un hito se completa, se publica esa versión. Cada cambio referencia su issue
 (`Closes #N`) y debe cumplir la _Definition of Done_: funciona contra la API, textos en español,
 estados de carga y error, lint y build en verde, mergeado en `develop`. La vista pública se usa sobre
 todo desde el celular: se diseña primero para celular y se verifica a 390 px. El admin se usa en
