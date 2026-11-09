@@ -84,3 +84,16 @@ export function currentRoundIndex(rounds: Round[]): number {
   );
   return index === -1 ? Math.max(rounds.length - 1, 0) : index;
 }
+
+export type BracketStats = { matches: number; athletes: number };
+
+/** Real matches (a bye isn't fought) and distinct athletes across one or more brackets. */
+export function bracketStats(matches: Match[]): BracketStats {
+  const fought = matches.filter((match) => match.status !== "bye");
+  const athletes = new Set(
+    matches
+      .flatMap((match) => [match.athlete_red_id, match.athlete_blue_id])
+      .filter((id) => id !== null),
+  );
+  return { matches: fought.length, athletes: athletes.size };
+}
