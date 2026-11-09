@@ -9,7 +9,7 @@ import type {
 // Typed as Record<Enum, string> so a new enum value in the API fails the typecheck until translated.
 
 export const tournamentStatusLabels: Record<TournamentStatus, string> = {
-  draft: "Borrador",
+  draft: "Inscripciones abiertas",
   in_progress: "En curso",
   finished: "Finalizado",
 };
