@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import type { Match } from "@/lib/api/types";
 
 import {
+  currentRoundIndex,
   groupRounds,
   matchesToScore,
   pendingMatchCount,
   roundName,
   roundsWon,
+  shortRoundName,
 } from "./bracket";
 
 const match = (
@@ -117,5 +119,40 @@ describe("pendingMatchCount", () => {
       match(3, 2, 0),
     ];
     expect(pendingMatchCount(matches)).toBe(1);
+  });
+});
+
+describe("shortRoundName", () => {
+  it("abbreviates counting back from the final", () => {
+    expect(shortRoundName(4, 4)).toBe("Final");
+    expect(shortRoundName(3, 4)).toBe("Semi");
+    expect(shortRoundName(1, 5)).toBe("16avos");
+  });
+
+  it("falls back to a number when there are too many rounds", () => {
+    expect(shortRoundName(1, 6)).toBe("R1");
+  });
+});
+
+describe("currentRoundIndex", () => {
+  it("opens the earliest round with a pending match", () => {
+    const rounds = groupRounds([
+      match(1, 1, 1, { status: "finished" }),
+      match(2, 2, 1),
+      match(3, 3, 1),
+    ]);
+    expect(currentRoundIndex(rounds)).toBe(1);
+  });
+
+  it("opens the final when everything is finished", () => {
+    const rounds = groupRounds([
+      match(1, 1, 1, { status: "bye" }),
+      match(2, 2, 1, { status: "finished" }),
+    ]);
+    expect(currentRoundIndex(rounds)).toBe(1);
+  });
+
+  it("doesn't fail without rounds", () => {
+    expect(currentRoundIndex([])).toBe(0);
   });
 });

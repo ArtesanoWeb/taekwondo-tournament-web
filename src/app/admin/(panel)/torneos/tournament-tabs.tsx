@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  type ReactNode,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import type { ReactNode } from "react";
+
+import { useSwipeTabs } from "@/components/use-swipe-tabs";
 
 type TournamentGroup = {
   key: string;
@@ -27,33 +23,8 @@ type TournamentTabsProps = {
  * From `lg` up: every group side by side in columns.
  */
 export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
-  const [active, setActive] = useState(initialIndex);
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const panelRefs = useRef<(HTMLElement | null)[]>([]);
-
-  useLayoutEffect(() => {
-    const scroller = scrollerRef.current;
-    if (scroller) scroller.scrollLeft = initialIndex * scroller.clientWidth;
-  }, [initialIndex]);
-
-  // Panels sit side by side, so without this a short group would inherit the tallest one's height.
-  useEffect(() => {
-    const panel = panelRefs.current[active];
-    if (panel) {
-      scrollerRef.current?.style.setProperty(
-        "--panel-height",
-        `${panel.offsetHeight}px`,
-      );
-    }
-  }, [active]);
-
-  const goTo = (index: number) => {
-    const scroller = scrollerRef.current;
-    scroller?.scrollTo({
-      left: index * scroller.clientWidth,
-      behavior: "smooth",
-    });
-  };
+  const { active, scrollerRef, panelRef, goTo, onScroll } =
+    useSwipeTabs(initialIndex);
 
   return (
     <div className="flex flex-col gap-4">
@@ -76,19 +47,16 @@ export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
       </div>
 
       <div
-        ref={scrollerRef}
-        onScroll={(event) => {
-          const { scrollLeft, clientWidth } = event.currentTarget;
-          if (clientWidth > 0) setActive(Math.round(scrollLeft / clientWidth));
+        ref={(element) => {
+          scrollerRef.current = element;
         }}
+        onScroll={onScroll}
         className="flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start gap-4 overflow-x-auto overflow-y-hidden lg:grid lg:h-auto lg:grid-cols-3 lg:overflow-visible"
       >
         {groups.map((group, index) => (
           <section
             key={group.key}
-            ref={(element) => {
-              panelRefs.current[index] = element;
-            }}
+            ref={panelRef(index)}
             aria-label={group.label}
             className="w-full shrink-0 snap-start pb-20 sm:pb-1 lg:pb-0"
           >

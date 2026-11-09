@@ -1,6 +1,12 @@
 import type { Match } from "@/lib/api/types";
 
-export type Round = { number: number; name: string; matches: Match[] };
+export type Round = {
+  number: number;
+  name: string;
+  /** For the phone tabs, where the full name doesn't fit. */
+  shortName: string;
+  matches: Match[];
+};
 
 // Named from the end: the last round is always the final.
 const NAMES_FROM_FINAL = [
@@ -11,8 +17,23 @@ const NAMES_FROM_FINAL = [
   "Dieciseisavos de final",
 ];
 
+const SHORT_NAMES_FROM_FINAL = [
+  "Final",
+  "Semi",
+  "Cuartos",
+  "Octavos",
+  "16avos",
+];
+
 export function roundName(roundNumber: number, totalRounds: number): string {
   return NAMES_FROM_FINAL[totalRounds - roundNumber] ?? `Ronda ${roundNumber}`;
+}
+
+export function shortRoundName(
+  roundNumber: number,
+  totalRounds: number,
+): string {
+  return SHORT_NAMES_FROM_FINAL[totalRounds - roundNumber] ?? `R${roundNumber}`;
 }
 
 /** The API returns every match of every round in one unordered list. */
@@ -23,6 +44,7 @@ export function groupRounds(matches: Match[]): Round[] {
   return roundNumbers.map((number) => ({
     number,
     name: roundName(number, totalRounds),
+    shortName: shortRoundName(number, totalRounds),
     matches: byRound.get(number)!.toSorted((a, b) => a.slot - b.slot),
   }));
 }
@@ -53,4 +75,12 @@ export function matchesToScore(matches: Match[]): Match[] {
 /** Matches still to be fought, counting those that wait for an earlier result. */
 export function pendingMatchCount(matches: Match[]): number {
   return matches.filter((match) => match.status === "pending").length;
+}
+
+/** The round to open first: the earliest with a pending match, or the final when all are done. */
+export function currentRoundIndex(rounds: Round[]): number {
+  const index = rounds.findIndex((round) =>
+    round.matches.some((match) => match.status === "pending"),
+  );
+  return index === -1 ? Math.max(rounds.length - 1, 0) : index;
 }
