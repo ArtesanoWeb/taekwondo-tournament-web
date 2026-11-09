@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 const navLinks = [
   { href: "/admin/torneos", label: "Torneos" },
   { href: "/admin/atletas", label: "Atletas" },
+  { href: "/admin/clubes", label: "Clubes" },
   { href: "/", label: "Ver sitio" },
 ];
 
