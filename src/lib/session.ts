@@ -10,12 +10,7 @@ import {
   createApiClient,
   type Result,
 } from "./api/client";
-import {
-  isTokenExpired,
-  loginUrl,
-  readTokenClaims,
-  SESSION_COOKIE,
-} from "./auth";
+import { isTokenExpired, loginUrl, SESSION_COOKIE } from "./auth";
 
 // The cookie outlives the 8 h token on purpose: when the token expires the cookie is still there,
 // so the login page can say "Tu sesión venció" instead of looking like the user never logged in.
@@ -42,10 +37,6 @@ export async function deleteSession() {
  */
 export async function getAdminApi() {
   return createApiClient(await requireToken());
-}
-
-export async function getAdminUsername(): Promise<string> {
-  return readTokenClaims(await requireToken())?.sub ?? "admin";
 }
 
 async function requireToken(): Promise<string> {
