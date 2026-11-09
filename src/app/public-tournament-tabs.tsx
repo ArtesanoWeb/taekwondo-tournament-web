@@ -76,7 +76,7 @@ export function PublicTournamentTabs({
             aria-label={group.label}
             className="w-full shrink-0 snap-start pb-1"
           >
-            <h2 className="mb-3 text-xl font-semibold">
+            <h2 className="mb-3 hidden text-xl font-semibold lg:block">
               {group.label} ({group.count})
             </h2>
             {group.count > 0 ? (

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Match } from "@/lib/api/types";
 
 import {
+  bracketStats,
   currentRoundIndex,
   groupRounds,
   matchesToScore,
@@ -154,5 +155,25 @@ describe("currentRoundIndex", () => {
 
   it("doesn't fail without rounds", () => {
     expect(currentRoundIndex([])).toBe(0);
+  });
+});
+
+describe("bracketStats", () => {
+  it("doesn't count byes as matches, and counts each athlete once", () => {
+    expect(
+      bracketStats([
+        match(1, 1, 1, { athlete_red_id: 1, athlete_blue_id: 2 }),
+        match(2, 1, 2, {
+          athlete_red_id: 3,
+          athlete_blue_id: null,
+          status: "bye",
+        }),
+        match(3, 2, 1, { athlete_red_id: 1, athlete_blue_id: 3 }),
+      ]),
+    ).toEqual({ matches: 2, athletes: 3 });
+  });
+
+  it("is zero without matches", () => {
+    expect(bracketStats([])).toEqual({ matches: 0, athletes: 0 });
   });
 });
