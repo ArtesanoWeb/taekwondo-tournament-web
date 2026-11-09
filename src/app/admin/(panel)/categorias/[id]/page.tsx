@@ -9,11 +9,16 @@ import type { Bracket, Category, TournamentStatus } from "@/lib/api/types";
 import { groupRounds, matchesToScore, pendingMatchCount } from "@/lib/bracket";
 import { formatAgeRange } from "@/lib/categories";
 import { genderLabels } from "@/lib/labels";
-import { canWithdraw, sortByAthleteName } from "@/lib/registrations";
+import {
+  canWithdraw,
+  sortByAthleteName,
+  toAthleteOptions,
+} from "@/lib/registrations";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
 import { GenerateBracket } from "./generate-bracket";
 import { MatchScoreForm } from "./match-score-form";
+import { RegisterAthleteButton } from "./register-athlete-dialog";
 import { RegistrationList } from "./registration-list";
 
 export default function AdminCategoryPage({
@@ -68,6 +73,14 @@ async function AdminCategory({
   const status = tournament.data.status;
   const registered = registrations.data.length;
 
+  // The whole roster is only needed while athletes can still be registered.
+  const athletes = canWithdraw(status)
+    ? await adminAttempt(api.GET("/api/v1/athletes"))
+    : null;
+  if (athletes && !athletes.ok) {
+    return <ErrorNotice message={athletes.error.message} />;
+  }
+
   return (
     <>
       <Link
@@ -113,7 +126,15 @@ async function AdminCategory({
       )}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Inscritos</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">Inscritos</h2>
+          {athletes?.ok && (
+            <RegisterAthleteButton
+              categoryId={categoryId}
+              options={toAthleteOptions(athletes.data, registrations.data)}
+            />
+          )}
+        </div>
         <RegistrationList
           registrations={sortByAthleteName(registrations.data)}
           canWithdraw={canWithdraw(status)}

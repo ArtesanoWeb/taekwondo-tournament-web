@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import type { Registration } from "@/lib/api/types";
+import type { Athlete, Registration } from "@/lib/api/types";
 
 import {
+  type AthleteOption,
   canWithdraw,
   countAthletesByTournament,
+  filterAthleteOptions,
   sortByAthleteName,
+  toAthleteOptions,
 } from "./registrations";
 
 const registration = (id: number, name: string) =>
@@ -45,5 +48,52 @@ describe("countAthletesByTournament", () => {
     expect(counts.get(1)).toBe(2);
     expect(counts.get(2)).toBe(1);
     expect(counts.get(3)).toBeUndefined();
+  });
+});
+
+describe("toAthleteOptions", () => {
+  it("leaves out the athletes already registered", () => {
+    const athlete = (id: number) =>
+      ({
+        id,
+        name: `A${id}`,
+        ci: null,
+        weight_kg: 40,
+        club: { id: 1, name: "Club" },
+      }) as Athlete;
+    const options = toAthleteOptions(
+      [athlete(1), athlete(2)],
+      [{ athlete_id: 2 } as Registration],
+    );
+    expect(options).toEqual([
+      { id: 1, name: "A1", ci: null, club: "Club", weightKg: 40 },
+    ]);
+  });
+});
+
+describe("filterAthleteOptions", () => {
+  const option = (id: number, name: string, ci: string | null) =>
+    ({ id, name, ci, club: "C", weightKg: 40 }) as AthleteOption;
+  const options = [
+    option(1, "Zoé Pérez", "1234567"),
+    option(2, "Ana Quispe", null),
+  ];
+
+  it("returns everyone with a blank search", () => {
+    expect(filterAthleteOptions(options, "  ")).toHaveLength(2);
+  });
+
+  it("finds by name ignoring accents and case", () => {
+    expect(filterAthleteOptions(options, "ZOE per").map((o) => o.id)).toEqual([
+      1,
+    ]);
+  });
+
+  it("finds by CI", () => {
+    expect(filterAthleteOptions(options, "2345").map((o) => o.id)).toEqual([1]);
+  });
+
+  it("returns nothing without a match", () => {
+    expect(filterAthleteOptions(options, "xyz")).toEqual([]);
   });
 });
