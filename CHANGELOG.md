@@ -7,6 +7,50 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-09
+
+Preparar y seguir un torneo desde el celular: el admin arma un torneo completo sin tocar el backend,
+y el sitio público muestra también los torneos con inscripciones abiertas.
+
+### Added
+
+- Administración: crear torneos en `/admin/torneos/nuevo` (#43) y sus categorías desde el detalle del
+  torneo, mientras las inscripciones estén abiertas (#68).
+- Administración: `/admin/atletas`, con búsqueda por nombre o CI y un modal para crear y editar. Si un
+  cambio de peso o género saca al atleta de una categoría, avisa antes de guardar (#44).
+- Administración: `/admin/clubes`, para crear y renombrar clubes (#67).
+- Administración: inscribir atletas en una categoría con un buscador (#69) y retirarlos con
+  confirmación mientras las inscripciones estén abiertas (#56).
+- Administración en celular: barra inferior con Torneos, Atletas y Más (#72), y botón flotante para
+  crear un torneo (#64).
+- Sitio público: los torneos con inscripciones abiertas aparecen y se pueden abrir (#71). En cada
+  torneo en curso y sus categorías se ven combates y atletas, o que la llave no fue sorteada.
+- En el celular, la llave se puede ver por columna o como mapa (#28, #65).
+
+### Changed
+
+- "Borrador" pasa a llamarse "Inscripciones abiertas", e "Iniciar torneo" a "Cerrar inscripciones e
+  iniciar torneo" (#55).
+- La lista de torneos se separa en En curso, Inscripciones abiertas y Finalizados: pestañas o barra
+  inferior con deslizamiento en celular, y columnas en PC (#64, #71).
+- En la categoría del admin, la llave es la vista principal y se anota tocando el combate, en un
+  modal. Con inscripciones abiertas solo se ven los inscritos (#65).
+- Detalle del torneo en el admin con cabecera más clara, e iniciar y finalizar abajo y separados
+  (#66). Enlaces del admin al sitio público (#58).
+- Los campos numéricos solo aceptan dígitos, por lo que el peso se ingresa en enteros (#68).
+- En celular se oculta el pie de página con las versiones.
+
+### Fixed
+
+- Las respuestas sin contenido de la API (`204`) ya no se muestran como error (#56).
+
+### Known issues
+
+- El visitante todavía no ve los nombres de los inscritos: falta un endpoint público en el backend
+  (#54). En sus torneos, los atletas se cuentan solo en las llaves ya sorteadas.
+- Al inscribir se listan todos los atletas, y la API rechaza a quienes no cumplen las reglas (#78).
+- Un torneo recién creado es visible al público de inmediato, aunque esté incompleto.
+
 ## [0.3.0] - 2026-11-02
 
 Administración en vivo: el admin inicia sesión, inicia y finaliza torneos, genera las llaves y anota
