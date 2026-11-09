@@ -20,7 +20,7 @@ const navLinks = [
 // `getAdminApi()`, and `proxy.ts` already redirects requests without one.
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
-    <div className="flex flex-col gap-6 py-6">
+    <div className="flex flex-col gap-6 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))] sm:pb-6">
       <div className="hidden items-center justify-between gap-x-4 border-b border-zinc-200 pb-3 sm:flex dark:border-zinc-800">
         <nav aria-label="Administración">
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">

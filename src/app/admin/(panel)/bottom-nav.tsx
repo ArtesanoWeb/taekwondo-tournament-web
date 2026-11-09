@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type ReactNode, Suspense, useEffect, useRef } from "react";
+import { type ReactNode, Suspense, useRef } from "react";
 
 import { logout } from "../actions";
 
@@ -108,13 +108,6 @@ function CurrentTabs() {
 export function BottomNav() {
   const sheetRef = useRef<HTMLDialogElement>(null);
   const closeSheet = () => sheetRef.current?.close();
-
-  // Reserves the bar's space (see `globals.css`). An effect and not CSS `:has()`: Next keeps the
-  // previous page hidden in the DOM, but its effects are cleaned up when it leaves the screen.
-  useEffect(() => {
-    document.body.classList.add("has-bottom-nav");
-    return () => document.body.classList.remove("has-bottom-nav");
-  }, []);
 
   return (
     <nav

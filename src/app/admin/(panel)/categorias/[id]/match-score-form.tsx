@@ -2,7 +2,10 @@
 
 import { useActionState, useRef, useState } from "react";
 
-import { primaryButtonClass } from "@/components/button-classes";
+import {
+  primaryButtonClass,
+  secondaryButtonClass,
+} from "@/components/button-classes";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
@@ -16,12 +19,14 @@ type MatchScoreFormProps = {
   match: Match;
   roundName: string;
   roundsToWin: number;
+  onCancel: () => void;
 };
 
 export function MatchScoreForm({
   match,
   roundName,
   roundsToWin,
+  onCancel,
 }: MatchScoreFormProps) {
   const [state, formAction, isPending] = useActionState<RoundState, FormData>(
     addRound,
@@ -53,11 +58,7 @@ export function MatchScoreForm({
     preview && (preview.red > preview.blue ? redName : blueName);
 
   return (
-    <form
-      ref={formRef}
-      action={formAction}
-      className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
-    >
+    <form ref={formRef} action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="matchId" value={match.id} />
       <div className="flex items-baseline justify-between gap-3 text-sm">
         <h3 className="font-semibold">
@@ -101,6 +102,9 @@ export function MatchScoreForm({
         className={`${primaryButtonClass} py-3 text-base`}
       >
         {isPending ? "Guardando…" : `Guardar round ${nextRound}`}
+      </button>
+      <button type="button" onClick={onCancel} className={secondaryButtonClass}>
+        Cerrar
       </button>
 
       <ConfirmDialog
