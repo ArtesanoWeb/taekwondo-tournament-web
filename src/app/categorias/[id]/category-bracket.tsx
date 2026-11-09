@@ -7,7 +7,6 @@ import { api, attempt } from "@/lib/api/client";
 import { formatAgeRange } from "@/lib/categories";
 import { formatDateTime } from "@/lib/format";
 import { beltGroupLabels, genderLabels } from "@/lib/labels";
-import { isPublic } from "@/lib/tournaments";
 
 export async function CategoryBracket({
   params,
@@ -33,8 +32,7 @@ export async function CategoryBracket({
       params: { path: { tournament_id: category.data.tournament_id } },
     }),
   );
-  // Categories of a draft tournament stay hidden, like the tournament itself.
-  if (tournament.ok && !isPublic(tournament.data.status)) notFound();
+  const enrollmentOpen = tournament.ok && tournament.data.status === "draft";
 
   return (
     <>
@@ -58,7 +56,13 @@ export async function CategoryBracket({
         </p>
       </header>
 
-      {bracket.ok ? (
+      {enrollmentOpen ? (
+        // The names come with #54: the API doesn't publish the registrations without a token yet.
+        <p className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
+          Las inscripciones están abiertas. La lista de inscritos se publicará
+          pronto.
+        </p>
+      ) : bracket.ok ? (
         <section className="flex flex-col gap-4">
           <p className="text-sm text-zinc-500">
             {bracket.data.size} lugares · Sorteada el{" "}

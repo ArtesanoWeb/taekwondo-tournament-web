@@ -13,6 +13,7 @@ import { genderLabels } from "@/lib/labels";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
 import { StatusAction } from "../status-action";
+import { NewCategoryButton } from "./category-dialog";
 
 export default function AdminTournamentPage({
   params,
@@ -96,31 +97,51 @@ async function AdminTournamentDetail({
     }),
   );
 
+  const athletes = [...summaries.values()].reduce(
+    (total, summary) => total + summary.registered,
+    0,
+  );
+
   return (
     <>
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {tournament.data.name}
-            </h1>
-            <TournamentStatusBadge status={tournament.data.status} />
-          </div>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            <time dateTime={tournament.data.date}>
-              {formatDate(tournament.data.date)}
-            </time>
-            {" · "}
-            {tournament.data.location}
-          </p>
+      <header className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div>
+          <TournamentStatusBadge status={tournament.data.status} />
         </div>
-        <StatusAction tournament={tournament.data} />
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {tournament.data.name}
+        </h1>
+        <div className="flex flex-col gap-0.5 text-zinc-600 dark:text-zinc-400">
+          <time dateTime={tournament.data.date}>
+            {formatDate(tournament.data.date)}
+          </time>
+          <span>{tournament.data.location}</span>
+          <span>{athletes === 1 ? "1 atleta" : `${athletes} atletas`}</span>
+        </div>
+        <Link
+          href={`/torneos/${tournament.data.id}`}
+          className="w-fit text-sm font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
+        >
+          Ver en el sitio público
+        </Link>
       </header>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-xl font-semibold">Categorías</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">Categorías</h2>
+          {tournament.data.status === "draft" && (
+            <NewCategoryButton tournamentId={tournament.data.id} />
+          )}
+        </div>
         <CategoryGroups categories={categories.data} summaries={summaries} />
       </section>
+
+      {/* At the end and apart: these can't be undone, so they shouldn't be hit by accident. */}
+      {tournament.data.status !== "finished" && (
+        <section className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
+          <StatusAction tournament={tournament.data} />
+        </section>
+      )}
     </>
   );
 }
@@ -152,7 +173,7 @@ function CategoryGroups({
           <li key={category.id}>
             <Link
               href={`/admin/categorias/${category.id}`}
-              className="flex h-full flex-col gap-1 rounded-lg border border-zinc-200 p-4 transition-colors hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
+              className="flex h-full flex-col gap-1 rounded-lg border border-zinc-200 p-4 transition-colors hover:border-zinc-400 active:bg-zinc-100 dark:border-zinc-800 dark:hover:border-zinc-600 dark:active:bg-zinc-800"
             >
               <span className="font-semibold">
                 {category.age_label} · {category.weight_label}

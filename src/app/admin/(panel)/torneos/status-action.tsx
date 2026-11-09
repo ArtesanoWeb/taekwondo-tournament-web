@@ -2,7 +2,8 @@
 
 import { useActionState, useRef } from "react";
 
-import { ConfirmDialog, primaryButtonClass } from "@/components/confirm-dialog";
+import { primaryButtonClass } from "@/components/button-classes";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FormError } from "@/components/form-error";
 import type { Tournament } from "@/lib/api/types";
 
@@ -11,11 +12,11 @@ import { changeTournamentStatus, type StatusActionState } from "./actions";
 const actions = {
   draft: {
     action: "start",
-    label: "Iniciar torneo",
+    label: "Cerrar inscripciones e iniciar torneo",
     pendingLabel: "Iniciando…",
     consequence:
-      "Se cierran las inscripciones y la creación de categorías, y ya se pueden generar las llaves.",
-    confirm: "Sí, iniciar",
+      "Ya no se podrá inscribir a nadie más ni crear categorías, y se podrán generar las llaves.",
+    confirm: "Sí, cerrar e iniciar",
   },
   in_progress: {
     action: "finish",

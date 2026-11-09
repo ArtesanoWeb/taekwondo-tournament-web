@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Tournament, TournamentStatus } from "@/lib/api/types";
 
-import {
-  groupPublicTournaments,
-  isPublic,
-  sortByMostRecent,
-} from "./tournaments";
+import { groupTournamentsByStatus, sortByMostRecent } from "./tournaments";
 
 const tournament = (
   id: number,
@@ -32,31 +28,17 @@ describe("sortByMostRecent", () => {
   });
 });
 
-describe("isPublic", () => {
-  it("hides only drafts", () => {
-    expect(isPublic("draft")).toBe(false);
-    expect(isPublic("in_progress")).toBe(true);
-    expect(isPublic("finished")).toBe(true);
-  });
-});
-
-describe("groupPublicTournaments", () => {
-  it("splits by status, newest first in each group, and leaves drafts out", () => {
-    const groups = groupPublicTournaments([
-      tournament(1, "2026-01-10", "finished"),
-      tournament(2, "2026-11-20", "draft"),
-      tournament(3, "2026-10-05", "in_progress"),
-      tournament(4, "2026-06-01", "finished"),
-      tournament(5, "2026-11-01", "in_progress"),
+describe("groupTournamentsByStatus", () => {
+  it("splits every status, each group from the most recent to the oldest", () => {
+    const groups = groupTournamentsByStatus([
+      tournament(1, "2026-01-01", "draft"),
+      tournament(2, "2026-02-01", "in_progress"),
+      tournament(3, "2026-03-01", "draft"),
+      tournament(4, "2026-04-01", "finished"),
+      tournament(5, "2026-05-01", "in_progress"),
     ]);
-    expect(groups.inProgress.map((t) => t.id)).toEqual([5, 3]);
-    expect(groups.finished.map((t) => t.id)).toEqual([4, 1]);
-  });
-
-  it("returns empty groups when there is nothing public", () => {
-    expect(groupPublicTournaments([tournament(1, "2026-11-20")])).toEqual({
-      inProgress: [],
-      finished: [],
-    });
+    expect(groups.inProgress.map((t) => t.id)).toEqual([5, 2]);
+    expect(groups.open.map((t) => t.id)).toEqual([3, 1]);
+    expect(groups.finished.map((t) => t.id)).toEqual([4]);
   });
 });
