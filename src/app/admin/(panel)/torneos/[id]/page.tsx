@@ -13,6 +13,7 @@ import { genderLabels } from "@/lib/labels";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
 import { StatusAction } from "../status-action";
+import { NewCategoryButton } from "./category-dialog";
 
 export default function AdminTournamentPage({
   params,
@@ -118,7 +119,12 @@ async function AdminTournamentDetail({
       </header>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-xl font-semibold">Categorías</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">Categorías</h2>
+          {tournament.data.status === "draft" && (
+            <NewCategoryButton tournamentId={tournament.data.id} />
+          )}
+        </div>
         <CategoryGroups categories={categories.data} summaries={summaries} />
       </section>
     </>

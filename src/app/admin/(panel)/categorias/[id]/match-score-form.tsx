@@ -4,6 +4,7 @@ import { useActionState, useRef, useState } from "react";
 
 import { primaryButtonClass } from "@/components/button-classes";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
 import type { Match } from "@/lib/api/types";
 import { roundsWon } from "@/lib/bracket";
@@ -171,9 +172,8 @@ function PointsInput({
           </span>
         </span>
       </span>
-      <input
+      <DigitsInput
         name={color}
-        inputMode="numeric"
         pattern="[0-9]*"
         autoComplete="off"
         placeholder="0"
