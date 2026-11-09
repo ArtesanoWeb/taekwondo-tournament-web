@@ -24,3 +24,17 @@ export function groupPublicTournaments(
     finished: sorted.filter((t) => t.status === "finished"),
   };
 }
+
+export type AdminTournamentGroups = PublicTournamentGroups & {
+  open: Tournament[];
+};
+
+/** Splits every tournament by status, each group from the most recent to the oldest. */
+export function groupAdminTournaments(
+  tournaments: Tournament[],
+): AdminTournamentGroups {
+  return {
+    ...groupPublicTournaments(tournaments),
+    open: sortByMostRecent(tournaments).filter((t) => t.status === "draft"),
+  };
+}
