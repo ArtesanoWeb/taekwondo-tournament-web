@@ -1,40 +1,23 @@
-import type { Tournament, TournamentStatus } from "@/lib/api/types";
+import type { Tournament } from "@/lib/api/types";
 
 export function sortByMostRecent(tournaments: Tournament[]): Tournament[] {
   return tournaments.toSorted((a, b) => b.date.localeCompare(a.date));
 }
 
-/** Drafts are still being prepared by the admin, so the public site doesn't show them. */
-export function isPublic(status: TournamentStatus): boolean {
-  return status !== "draft";
-}
-
-export type PublicTournamentGroups = {
+export type TournamentGroups = {
   inProgress: Tournament[];
+  open: Tournament[];
   finished: Tournament[];
 };
 
-/** Splits the public tournaments by status, each group from the most recent to the oldest. */
-export function groupPublicTournaments(
+/** Splits the tournaments by status, each group from the most recent to the oldest. */
+export function groupTournamentsByStatus(
   tournaments: Tournament[],
-): PublicTournamentGroups {
+): TournamentGroups {
   const sorted = sortByMostRecent(tournaments);
   return {
     inProgress: sorted.filter((t) => t.status === "in_progress"),
+    open: sorted.filter((t) => t.status === "draft"),
     finished: sorted.filter((t) => t.status === "finished"),
-  };
-}
-
-export type AdminTournamentGroups = PublicTournamentGroups & {
-  open: Tournament[];
-};
-
-/** Splits every tournament by status, each group from the most recent to the oldest. */
-export function groupAdminTournaments(
-  tournaments: Tournament[],
-): AdminTournamentGroups {
-  return {
-    ...groupPublicTournaments(tournaments),
-    open: sortByMostRecent(tournaments).filter((t) => t.status === "draft"),
   };
 }

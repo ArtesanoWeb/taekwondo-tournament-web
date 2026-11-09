@@ -8,7 +8,7 @@ import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { formatDate } from "@/lib/format";
 import { countAthletesByTournament } from "@/lib/registrations";
 import { adminAttempt, getAdminApi } from "@/lib/session";
-import { groupAdminTournaments } from "@/lib/tournaments";
+import { groupTournamentsByStatus } from "@/lib/tournaments";
 import type { Tournament } from "@/lib/api/types";
 
 import { TournamentTabs } from "./tournament-tabs";
@@ -82,7 +82,7 @@ async function AdminTournamentList({
     );
   }
 
-  const { inProgress, open, finished } = groupAdminTournaments(result.data);
+  const { inProgress, open, finished } = groupTournamentsByStatus(result.data);
   const renderCards = (tournaments: Tournament[]) =>
     tournaments.map((tournament) => (
       <li key={tournament.id}>
