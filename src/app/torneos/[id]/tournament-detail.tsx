@@ -8,7 +8,6 @@ import type { Category } from "@/lib/api/types";
 import { formatAgeRange, groupByGender } from "@/lib/categories";
 import { formatDate } from "@/lib/format";
 import { beltGroupLabels, genderLabels } from "@/lib/labels";
-import { isPublic } from "@/lib/tournaments";
 
 export async function TournamentDetail({
   params,
@@ -36,8 +35,6 @@ export async function TournamentDetail({
     if (tournament.error.status === 404) notFound();
     return <ErrorNotice message={tournament.error.message} />;
   }
-  // A draft looks like it doesn't exist, so its URL doesn't leak it before it starts.
-  if (!isPublic(tournament.data.status)) notFound();
 
   return (
     <>

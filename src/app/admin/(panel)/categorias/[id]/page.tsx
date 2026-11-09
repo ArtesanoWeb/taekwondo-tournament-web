@@ -101,6 +101,12 @@ async function AdminCategory({
           {" · "}
           {registered === 1 ? "1 inscrito" : `${registered} inscritos`}
         </p>
+        <Link
+          href={`/categorias/${categoryId}`}
+          className="w-fit text-sm font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
+        >
+          Ver en el sitio público
+        </Link>
       </header>
 
       {status === "draft" ? (
