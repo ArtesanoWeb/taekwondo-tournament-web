@@ -1,20 +1,60 @@
+"use client";
+
 import type { Bracket, Match } from "@/lib/api/types";
-import { groupRounds, roundsWon } from "@/lib/bracket";
+import { currentRoundIndex, groupRounds, roundsWon } from "@/lib/bracket";
 import { matchStatusLabels } from "@/lib/labels";
 
+import { useSwipeTabs } from "./use-swipe-tabs";
+
+/**
+ * Below `lg`: one round at a time, swiping or tapping the bar on top, because a full bracket
+ * doesn't fit a phone. From `lg` up: the classic bracket, with every round in a column.
+ */
 export function BracketView({ bracket }: { bracket: Bracket }) {
   const rounds = groupRounds(bracket.matches);
+  const { active, scrollerRef, panelRef, goTo, onScroll } = useSwipeTabs(
+    currentRoundIndex(rounds),
+  );
 
   return (
-    <div className="-mx-4 overflow-x-auto px-4 pb-4">
-      <ol className="flex min-w-max gap-8">
+    <div className="flex flex-col gap-3">
+      <div className="flex border-b border-zinc-200 lg:hidden dark:border-zinc-800">
         {rounds.map((round, index) => (
-          <li key={round.number} className="flex w-60 flex-col">
-            <h3 className="mb-1 text-sm font-semibold tracking-wide text-zinc-500 uppercase">
+          <button
+            key={round.number}
+            type="button"
+            aria-pressed={index === active}
+            aria-label={round.name}
+            onClick={() => goTo(index)}
+            className={`-mb-px min-w-0 flex-1 border-b-2 px-1 py-3 text-sm ${
+              index === active
+                ? "border-blue-600 font-semibold text-blue-600 dark:border-blue-400 dark:text-blue-400"
+                : "border-transparent text-zinc-600 dark:text-zinc-400"
+            }`}
+          >
+            {round.shortName}
+          </button>
+        ))}
+      </div>
+
+      <ol
+        ref={(element) => {
+          scrollerRef.current = element;
+        }}
+        onScroll={onScroll}
+        className="flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start overflow-x-auto overflow-y-hidden lg:-mx-4 lg:h-auto lg:snap-none lg:[scrollbar-width:auto] lg:items-stretch lg:gap-8 lg:px-4 lg:pb-4"
+      >
+        {rounds.map((round, index) => (
+          <li
+            key={round.number}
+            ref={panelRef(index)}
+            className="flex w-full shrink-0 snap-start flex-col lg:w-60"
+          >
+            <h3 className="mb-1 hidden text-sm font-semibold tracking-wide text-zinc-500 uppercase lg:block">
               {round.name}
             </h3>
-            {/* Every round has half the matches of the previous one, so each cell is twice as
-                tall and its two feeder matches are centered at 25% and 75% of its height. */}
+            {/* From `lg` up, every round has half the matches of the previous one, so each cell is
+                twice as tall and its two feeder matches are centered at 25% and 75% of its height. */}
             <ul className="flex flex-1 flex-col">
               {round.matches.map((match) => (
                 <li
@@ -36,7 +76,7 @@ export function BracketView({ bracket }: { bracket: Bracket }) {
 /** Lines from the two feeder matches (gap-8 to the left) into this one. */
 function Connector() {
   const line =
-    "pointer-events-none absolute border-zinc-300 dark:border-zinc-700";
+    "pointer-events-none absolute hidden border-zinc-300 lg:block dark:border-zinc-700";
   return (
     <>
       <span
