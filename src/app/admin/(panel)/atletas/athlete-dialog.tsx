@@ -6,6 +6,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/button-classes";
+import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
 import type { Athlete, Club } from "@/lib/api/types";
 import { athleteToFormValues, EMPTY_ATHLETE_VALUES } from "@/lib/athlete-form";
@@ -174,12 +175,11 @@ function AthleteDialog({ athlete, clubs, onClose }: AthleteDialogProps) {
           </label>
           <label className={labelClass}>
             Peso (kg)
-            <input
+            <DigitsInput
               name="weight"
-              inputMode="decimal"
               required
               autoComplete="off"
-              placeholder="38,5"
+              placeholder="38"
               defaultValue={values.weight}
               className={inputClass}
             />
