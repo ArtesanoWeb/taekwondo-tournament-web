@@ -28,6 +28,46 @@ export async function generateBracket(
   return {};
 }
 
+export type RegisterState = {
+  /** Who was just registered, so the admin sees it and can keep going. */
+  registeredId?: number;
+  error?: string;
+  errorAthleteId?: number;
+  /** The tournament may have started meanwhile: the page is stale once the dialog closes. */
+  stale?: boolean;
+};
+
+/** Registers an athlete in a category. The API enforces gender, weight and duplicates. */
+export async function registerAthlete(
+  _previous: RegisterState,
+  formData: FormData,
+): Promise<RegisterState> {
+  const categoryId = Number(formData.get("categoryId"));
+  const athleteId = Number(formData.get("athleteId"));
+  if (!Number.isInteger(categoryId) || !Number.isInteger(athleteId)) {
+    return { error: "No se pudo identificar la inscripción." };
+  }
+
+  const api = await getAdminApi();
+  const result = await adminAttempt(
+    api.POST("/api/v1/registrations", {
+      body: { category_id: categoryId, athlete_id: athleteId },
+    }),
+  );
+  if (!result.ok) {
+    // Not refreshed on 409: if the tournament started, the button that owns this dialog would
+    // disappear with it, taking the message along before it could be read.
+    return {
+      error: result.error.message,
+      errorAthleteId: athleteId,
+      stale: result.error.status === 409,
+    };
+  }
+
+  refresh();
+  return { registeredId: athleteId };
+}
+
 export type WithdrawState = { error?: string };
 
 /** Removes an athlete from a category. Only while the tournament is a draft (else the API says 409). */
