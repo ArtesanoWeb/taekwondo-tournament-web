@@ -148,6 +148,13 @@ export function BottomNav() {
         className="mt-auto mb-0 w-full max-w-none rounded-t-2xl bg-white text-zinc-950 backdrop:bg-black/50 dark:bg-zinc-900 dark:text-zinc-50"
       >
         <div className="flex flex-col gap-1 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <Link
+            href="/admin/clubes"
+            onClick={closeSheet}
+            className={sheetRowClass}
+          >
+            Clubes
+          </Link>
           <Link href="/" onClick={closeSheet} className={sheetRowClass}>
             Ver sitio
           </Link>
