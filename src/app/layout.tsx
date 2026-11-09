@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   },
   description: "Torneos, categorías y llaves de combate de taekwondo.",
 };
+
+// `cover` is what makes `env(safe-area-inset-bottom)` report the iPhone gesture area.
+export const viewport: Viewport = { viewportFit: "cover" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
