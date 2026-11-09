@@ -12,11 +12,11 @@ import { changeTournamentStatus, type StatusActionState } from "./actions";
 const actions = {
   draft: {
     action: "start",
-    label: "Iniciar torneo",
+    label: "Cerrar inscripciones e iniciar torneo",
     pendingLabel: "Iniciando…",
     consequence:
-      "Se cierran las inscripciones y la creación de categorías, y ya se pueden generar las llaves.",
-    confirm: "Sí, iniciar",
+      "Ya no se podrá inscribir a nadie más ni crear categorías, y se podrán generar las llaves.",
+    confirm: "Sí, cerrar e iniciar",
   },
   in_progress: {
     action: "finish",

@@ -131,7 +131,7 @@ function StatusNotice({ status }: { status: TournamentStatus }) {
       className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
     >
       {status === "draft"
-        ? "El torneo todavía no empezó. Inícialo para generar la llave y anotar resultados."
+        ? "Las inscripciones están abiertas. Ciérralas e inicia el torneo para generar la llave y anotar resultados."
         : "El torneo está finalizado: los resultados ya no se pueden cambiar."}
     </p>
   );
