@@ -5,8 +5,6 @@ import { Suspense } from "react";
 import { BracketView } from "@/components/bracket-view";
 import { ErrorNotice } from "@/components/error-notice";
 import { LoadingNotice } from "@/components/loading-notice";
-import type { Bracket, Category, TournamentStatus } from "@/lib/api/types";
-import { groupRounds, matchesToScore, pendingMatchCount } from "@/lib/bracket";
 import { formatAgeRange } from "@/lib/categories";
 import { genderLabels } from "@/lib/labels";
 import {
@@ -17,9 +15,10 @@ import {
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
 import { GenerateBracket } from "./generate-bracket";
-import { MatchScoreForm } from "./match-score-form";
 import { RegisterAthleteButton } from "./register-athlete-dialog";
 import { RegistrationList } from "./registration-list";
+import { RegistrationsButton } from "./registrations-button";
+import { ScoringBracket } from "./scoring-bracket";
 
 export default function AdminCategoryPage({
   params,
@@ -72,6 +71,7 @@ async function AdminCategory({
 
   const status = tournament.data.status;
   const registered = registrations.data.length;
+  const roster = sortByAthleteName(registrations.data);
 
   // The whole roster is only needed while athletes can still be registered.
   const athletes = canWithdraw(status)
@@ -103,95 +103,50 @@ async function AdminCategory({
         </p>
       </header>
 
-      <StatusNotice status={status} />
-
-      {bracket.ok ? (
-        <>
-          {status === "in_progress" && (
-            <ScoringSection bracket={bracket.data} category={category.data} />
-          )}
-          <section className="flex flex-col gap-3">
-            <h2 className="text-xl font-semibold">Llave</h2>
-            <BracketView bracket={bracket.data} />
-          </section>
-        </>
-      ) : status === "in_progress" && registered >= 2 ? (
-        <GenerateBracket categoryId={categoryId} registered={registered} />
-      ) : (
-        <p className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
-          {registered < 2
-            ? `Hacen falta al menos 2 inscritos para generar la llave (hay ${registered}).`
-            : "La llave todavía no fue sorteada."}
-        </p>
-      )}
-
-      <section className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">Inscritos</h2>
-          {athletes?.ok && (
-            <RegisterAthleteButton
-              categoryId={categoryId}
-              options={toAthleteOptions(athletes.data, registrations.data)}
-            />
-          )}
-        </div>
-        <RegistrationList
-          registrations={sortByAthleteName(registrations.data)}
-          canWithdraw={canWithdraw(status)}
-        />
-      </section>
-    </>
-  );
-}
-
-function StatusNotice({ status }: { status: TournamentStatus }) {
-  if (status === "in_progress") return null;
-  return (
-    <p
-      role="status"
-      className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
-    >
-      {status === "draft"
-        ? "Las inscripciones están abiertas. Ciérralas e inicia el torneo para generar la llave y anotar resultados."
-        : "El torneo está finalizado: los resultados ya no se pueden cambiar."}
-    </p>
-  );
-}
-
-function ScoringSection({
-  bracket,
-  category,
-}: {
-  bracket: Bracket;
-  category: Category;
-}) {
-  const ready = matchesToScore(bracket.matches);
-  const roundNames = new Map(
-    groupRounds(bracket.matches).map((round) => [round.number, round.name]),
-  );
-
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-xl font-semibold">Para anotar</h2>
-      {ready.length > 0 ? (
-        <ul className="grid gap-4 lg:grid-cols-2">
-          {ready.map((match) => (
-            <li key={match.id}>
-              <MatchScoreForm
-                match={match}
-                roundName={roundNames.get(match.round_number)!}
-                roundsToWin={category.rounds_to_win}
+      {status === "draft" ? (
+        <section className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">Inscritos</h2>
+            {athletes?.ok && (
+              <RegisterAthleteButton
+                categoryId={categoryId}
+                options={toAthleteOptions(athletes.data, registrations.data)}
               />
-            </li>
-          ))}
-        </ul>
+            )}
+          </div>
+          <RegistrationList registrations={roster} canWithdraw />
+        </section>
       ) : (
-        <p className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
-          {pendingMatchCount(bracket.matches) === 0
-            ? "Todos los combates de esta llave están terminados."
-            : "No hay combates listos: esperan el resultado de otros combates."}
-        </p>
+        <>
+          <RegistrationsButton registrations={roster} />
+          {status === "finished" && (
+            <p
+              role="status"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+            >
+              El torneo está finalizado: los resultados ya no se pueden cambiar.
+            </p>
+          )}
+          {bracket.ok ? (
+            status === "in_progress" ? (
+              <ScoringBracket
+                bracket={bracket.data}
+                roundsToWin={category.data.rounds_to_win}
+              />
+            ) : (
+              <BracketView bracket={bracket.data} />
+            )
+          ) : status === "in_progress" && registered >= 2 ? (
+            <GenerateBracket categoryId={categoryId} registered={registered} />
+          ) : (
+            <p className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
+              {registered < 2
+                ? `Hacen falta al menos 2 inscritos para generar la llave (hay ${registered}).`
+                : "La llave no fue sorteada."}
+            </p>
+          )}
+        </>
       )}
-    </section>
+    </>
   );
 }
