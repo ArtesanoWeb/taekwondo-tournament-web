@@ -67,7 +67,7 @@ export function PublicTournamentTabs({
           scrollerRef.current = element;
         }}
         onScroll={onScroll}
-        className="flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start overflow-x-auto overflow-y-hidden lg:grid lg:h-auto lg:snap-none lg:grid-cols-3 lg:gap-4 lg:overflow-visible"
+        className="relative flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start gap-4 overflow-x-auto overflow-y-hidden lg:grid lg:h-auto lg:snap-none lg:grid-cols-3 lg:overflow-visible"
       >
         {groups.map((group, index) => (
           <section

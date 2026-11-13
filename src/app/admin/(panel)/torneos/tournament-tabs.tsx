@@ -51,7 +51,7 @@ export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
           scrollerRef.current = element;
         }}
         onScroll={onScroll}
-        className="flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start gap-4 overflow-x-auto overflow-y-hidden lg:grid lg:h-auto lg:grid-cols-3 lg:overflow-visible"
+        className="relative flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start gap-4 overflow-x-auto overflow-y-hidden lg:grid lg:h-auto lg:grid-cols-3 lg:overflow-visible"
       >
         {groups.map((group, index) => (
           <section

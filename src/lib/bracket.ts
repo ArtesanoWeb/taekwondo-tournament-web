@@ -97,3 +97,23 @@ export function bracketStats(matches: Match[]): BracketStats {
   );
   return { matches: fought.length, athletes: athletes.size };
 }
+
+/** The winner of the final once it's been fought, or `null` while it's still on. */
+export function champion(
+  matches: Match[],
+): { id: number; name: string } | null {
+  const final = matches.reduce<Match | null>(
+    (last, match) =>
+      !last || match.round_number > last.round_number ? match : last,
+    null,
+  );
+  if (!final || final.status !== "finished" || final.winner_id === null) {
+    return null;
+  }
+  const name =
+    final.winner_name ??
+    (final.winner_id === final.athlete_red_id
+      ? final.athlete_red_name
+      : final.athlete_blue_name);
+  return { id: final.winner_id, name: name ?? "" };
+}

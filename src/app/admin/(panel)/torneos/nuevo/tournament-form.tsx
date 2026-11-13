@@ -10,6 +10,10 @@ import { type CreateTournamentState, createTournament } from "../actions";
 const inputClass =
   "rounded-md border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-100 dark:focus:ring-zinc-100/10";
 
+// Android Chrome draws date inputs natively (own width and border): `appearance-none` lets them
+// look and stretch like the other fields; the min height keeps an empty one from collapsing.
+const dateInputClass = `${inputClass} min-h-[2.625rem] w-full appearance-none text-left [&::-webkit-date-and-time-value]:text-left`;
+
 export function TournamentForm() {
   const [state, formAction, isPending] = useActionState<
     CreateTournamentState,
@@ -43,7 +47,7 @@ export function TournamentForm() {
           type="date"
           required
           defaultValue={state.values?.date}
-          className={inputClass}
+          className={dateInputClass}
         />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
@@ -63,9 +67,10 @@ export function TournamentForm() {
       </p>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        {/* On phones the X on the title already closes the form. */}
         <Link
           href="/admin/torneos"
-          className="rounded-md border border-zinc-300 px-4 py-2.5 text-center font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
+          className="hidden rounded-md border border-zinc-300 px-4 py-2.5 text-center font-medium hover:bg-zinc-100 sm:block dark:border-zinc-700 dark:hover:bg-zinc-900"
         >
           Cancelar
         </Link>

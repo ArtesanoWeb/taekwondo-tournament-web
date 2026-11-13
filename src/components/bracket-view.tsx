@@ -1,159 +1,101 @@
 "use client";
 
-import { useState } from "react";
-import { flushSync } from "react-dom";
+import { useLayoutEffect, useRef } from "react";
 
 import type { Bracket, Match } from "@/lib/api/types";
-import { currentRoundIndex, groupRounds, roundsWon } from "@/lib/bracket";
+import {
+  champion,
+  currentRoundIndex,
+  groupRounds,
+  roundsWon,
+} from "@/lib/bracket";
 import { matchStatusLabels } from "@/lib/labels";
 
-import { useSwipeTabs } from "./use-swipe-tabs";
-
-// Width of a map column (`w-60`) plus the gap between columns (`gap-8`).
-const MAP_COLUMN_PX = 240 + 32;
-
-type BracketLayout = "column" | "map";
+// Width of a column (`w-60`) plus the gap between columns (`gap-8`).
+const COLUMN_PX = 240 + 32;
 
 /**
- * Below `lg` it offers two views: one round at a time (swipe or tap the bar on top), or the map,
- * the whole bracket to pan sideways. From `lg` up there's room for the map, so no choice is shown.
+ * The bracket as a map: one column per round, joined by lines. On phones it pans sideways and
+ * opens on the round being played; from `lg` up it usually fits and starts at the beginning.
  */
 export function BracketView({
   bracket,
   selectableIds,
   onSelectMatch,
+  clubs = {},
 }: {
   bracket: Bracket;
+  /** Each athlete's club by athlete id, shown under the names. The bracket only has names. */
+  clubs?: Record<number, string>;
   /** Matches that can be tapped, for the admin. Without them the bracket is read-only. */
   selectableIds?: Set<number>;
   onSelectMatch?: (matchId: number) => void;
 }) {
   const rounds = groupRounds(bracket.matches);
-  const { active, scrollerRef, panelRef, goTo, onScroll } = useSwipeTabs(
-    currentRoundIndex(rounds),
-  );
-  const [layout, setLayout] = useState<BracketLayout>("column");
-  const isMap = layout === "map";
+  const initialRound = currentRoundIndex(rounds);
+  const scrollerRef = useRef<HTMLOListElement>(null);
+  const winner = champion(bracket.matches);
 
-  const changeLayout = (next: BracketLayout) => {
-    // Synchronous so the scroll position below applies to the new layout: stays on the same round.
-    flushSync(() => setLayout(next));
+  // Only on mount: afterwards the map is panned freely.
+  useLayoutEffect(() => {
     const scroller = scrollerRef.current;
-    if (scroller) {
-      scroller.scrollLeft =
-        active * (next === "map" ? MAP_COLUMN_PX : scroller.clientWidth);
+    if (scroller && !window.matchMedia("(min-width: 64rem)").matches) {
+      scroller.scrollLeft = initialRound * COLUMN_PX;
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div
-        role="group"
-        aria-label="Vista de la llave"
-        className="flex w-fit rounded-md border border-zinc-300 p-0.5 lg:hidden dark:border-zinc-700"
-      >
-        {(
-          [
-            ["column", "Columna"],
-            ["map", "Mapa"],
-          ] as const
-        ).map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            aria-pressed={layout === value}
-            data-layout={value}
-            onClick={() => changeLayout(value)}
-            className={`rounded px-4 py-1.5 text-sm ${
-              layout === value
-                ? "bg-zinc-900 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-                : "text-zinc-600 dark:text-zinc-400"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {!isMap && (
-        <div className="flex border-b border-zinc-200 lg:hidden dark:border-zinc-800">
-          {rounds.map((round, index) => (
-            <button
-              key={round.number}
-              type="button"
-              aria-pressed={index === active}
-              aria-label={round.name}
-              onClick={() => goTo(index)}
-              className={`-mb-px min-w-0 flex-1 border-b-2 px-1 py-3 text-sm ${
-                index === active
-                  ? "border-blue-600 font-semibold text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                  : "border-transparent text-zinc-600 dark:text-zinc-400"
-              }`}
-            >
-              {round.shortName}
-            </button>
-          ))}
-        </div>
+    <div className="flex flex-col gap-4">
+      {winner && (
+        <ChampionCard name={winner.name} club={clubs[winner.id] ?? null} />
       )}
-
-      <ol
-        ref={(element) => {
-          scrollerRef.current = element;
-        }}
-        onScroll={isMap ? undefined : onScroll}
-        className={
-          isMap
-            ? "-mx-4 flex items-stretch gap-8 overflow-x-auto px-4 pb-4"
-            : "flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start overflow-x-auto overflow-y-hidden lg:-mx-4 lg:h-auto lg:snap-none lg:[scrollbar-width:auto] lg:items-stretch lg:gap-8 lg:px-4 lg:pb-4"
-        }
-      >
-        {rounds.map((round, index) => (
-          <li
-            key={round.number}
-            ref={panelRef(index)}
-            className={
-              isMap
-                ? "flex w-60 shrink-0 flex-col"
-                : "flex w-full shrink-0 snap-start flex-col lg:w-60"
-            }
-          >
-            <h3
-              className={`mb-1 text-sm font-semibold tracking-wide text-zinc-500 uppercase ${
-                isMap ? "" : "hidden lg:block"
-              }`}
-            >
-              {round.name}
-            </h3>
-            {/* In the map, every round has half the matches of the previous one, so each cell is
-                twice as tall and its two feeder matches are centered at 25% and 75% of its height. */}
-            <ul className="flex flex-1 flex-col">
-              {round.matches.map((match) => (
-                <li
-                  key={match.id}
-                  className="relative flex flex-1 items-center py-2"
-                >
-                  {index > 0 && <Connector alwaysVisible={isMap} />}
-                  <MatchCard
-                    match={match}
-                    onSelect={
-                      selectableIds?.has(match.id)
-                        ? () => onSelectMatch?.(match.id)
-                        : undefined
-                    }
-                  />
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ol>
+      {/* The line spans the screen on phones, like the title bar's; on larger screens it lines
+          up with the content while the map itself still pans past the edges. */}
+      <div className="border-t border-zinc-200 pt-4 max-sm:-mx-4 dark:border-zinc-800">
+        <ol
+          ref={scrollerRef}
+          aria-label="Llave"
+          className="flex items-stretch gap-8 overflow-x-auto px-4 sm:-mx-4 sm:pb-4"
+        >
+          {rounds.map((round, index) => (
+            <li key={round.number} className="flex w-60 shrink-0 flex-col">
+              <h3 className="mb-1 text-sm font-semibold tracking-wide text-zinc-500 uppercase">
+                {round.name}
+              </h3>
+              {/* Every round has half the matches of the previous one, so each cell is twice as tall
+                  and its two feeder matches are centered at 25% and 75% of its height. */}
+              <ul className="flex flex-1 flex-col">
+                {round.matches.map((match) => (
+                  <li
+                    key={match.id}
+                    className="relative flex flex-1 items-center py-2"
+                  >
+                    {index > 0 && <Connector />}
+                    <MatchCard
+                      match={match}
+                      clubs={clubs}
+                      onSelect={
+                        selectableIds?.has(match.id)
+                          ? () => onSelectMatch?.(match.id)
+                          : undefined
+                      }
+                    />
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }
 
 /** Lines from the two feeder matches (gap-8 to the left) into this one. */
-function Connector({ alwaysVisible }: { alwaysVisible: boolean }) {
-  const line = `pointer-events-none absolute border-zinc-300 dark:border-zinc-700 ${alwaysVisible ? "" : "hidden lg:block"}`;
+function Connector() {
+  const line =
+    "pointer-events-none absolute border-zinc-300 dark:border-zinc-700";
   return (
     <>
       <span
@@ -167,9 +109,11 @@ function Connector({ alwaysVisible }: { alwaysVisible: boolean }) {
 
 function MatchCard({
   match,
+  clubs,
   onSelect,
 }: {
   match: Match;
+  clubs: Record<number, string>;
   onSelect?: () => void;
 }) {
   const won = roundsWon(match);
@@ -185,6 +129,7 @@ function MatchCard({
       name:
         (color === "red" ? match.athlete_red_name : match.athlete_blue_name) ??
         null,
+      club: athleteId !== null ? (clubs[athleteId] ?? null) : null,
       emptyLabel: emptySideLabel,
       isWinner: match.winner_id !== null && match.winner_id === athleteId,
       isLoser:
@@ -231,6 +176,7 @@ function MatchCard({
 type SideProps = {
   color: "red" | "blue";
   name: string | null;
+  club: string | null;
   emptyLabel: string;
   isWinner: boolean;
   isLoser: boolean;
@@ -240,6 +186,7 @@ type SideProps = {
 function Side({
   color,
   name,
+  club,
   emptyLabel,
   isWinner,
   isLoser,
@@ -255,8 +202,18 @@ function Side({
       />
       <span className="sr-only">{color === "red" ? "Rojo:" : "Azul:"}</span>
       {name ? (
-        <span className="min-w-0 flex-1 truncate" title={name}>
-          {name}
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate" title={name}>
+            {name}
+          </span>
+          {club && (
+            <span
+              className="truncate text-xs font-normal text-zinc-500"
+              title={club}
+            >
+              {club}
+            </span>
+          )}
         </span>
       ) : (
         <span className="flex-1 text-zinc-400 italic">{emptyLabel}</span>
@@ -267,5 +224,29 @@ function Side({
         </span>
       )}
     </div>
+  );
+}
+
+function ChampionCard({ name, club }: { name: string; club: string | null }) {
+  return (
+    <section
+      aria-label="Campeón"
+      className="flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/40"
+    >
+      <span aria-hidden className="text-3xl">
+        👑
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <span className="text-xs font-semibold tracking-wide text-amber-800 uppercase dark:text-amber-300">
+          Campeón
+        </span>
+        <span className="truncate text-lg font-semibold">{name}</span>
+        {club && (
+          <span className="truncate text-sm text-zinc-600 dark:text-zinc-400">
+            {club}
+          </span>
+        )}
+      </div>
+    </section>
   );
 }

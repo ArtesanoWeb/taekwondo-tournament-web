@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { BracketView } from "@/components/bracket-view";
 import { ErrorNotice } from "@/components/error-notice";
 import { LoadingNotice } from "@/components/loading-notice";
+import { TitleBar } from "@/components/title-bar";
 import { formatAgeRange } from "@/lib/categories";
 import { genderLabels } from "@/lib/labels";
 import {
@@ -72,6 +72,13 @@ async function AdminCategory({
   const status = tournament.data.status;
   const registered = registrations.data.length;
   const roster = sortByAthleteName(registrations.data);
+  // The bracket only has names: the club comes from the registrations.
+  const clubs = Object.fromEntries(
+    registrations.data.map((registration) => [
+      registration.athlete_id,
+      registration.athlete.club.name,
+    ]),
+  );
 
   // The whole roster is only needed while athletes can still be registered.
   const athletes = canWithdraw(status)
@@ -83,31 +90,20 @@ async function AdminCategory({
 
   return (
     <>
-      <Link
-        href={`/admin/torneos/${tournament.data.id}`}
-        className="w-fit text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← {tournament.data.name}
-      </Link>
-
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {category.data.age_label} · {category.data.weight_label}
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          {genderLabels[category.data.gender]}
-          {" · "}
-          {formatAgeRange(category.data.min_age, category.data.max_age)}
-          {" · "}
-          {registered === 1 ? "1 inscrito" : `${registered} inscritos`}
-        </p>
-        <Link
-          href={`/categorias/${categoryId}`}
-          className="w-fit text-sm font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
-        >
-          Ver en el sitio público
-        </Link>
-      </header>
+      <TitleBar
+        title={`${category.data.age_label} · ${category.data.weight_label}`}
+        parentHref={`/admin/torneos/${tournament.data.id}`}
+        parentLabel={tournament.data.name}
+        subtitle={
+          <p>
+            {genderLabels[category.data.gender]}
+            {" · "}
+            {formatAgeRange(category.data.min_age, category.data.max_age)}
+            {" · "}
+            {registered === 1 ? "1 inscrito" : `${registered} inscritos`}
+          </p>
+        }
+      />
 
       {status === "draft" ? (
         <section className="flex flex-col gap-3">
@@ -137,10 +133,11 @@ async function AdminCategory({
             status === "in_progress" ? (
               <ScoringBracket
                 bracket={bracket.data}
+                clubs={clubs}
                 roundsToWin={category.data.rounds_to_win}
               />
             ) : (
-              <BracketView bracket={bracket.data} />
+              <BracketView bracket={bracket.data} clubs={clubs} />
             )
           ) : status === "in_progress" && registered >= 2 ? (
             <GenerateBracket categoryId={categoryId} registered={registered} />

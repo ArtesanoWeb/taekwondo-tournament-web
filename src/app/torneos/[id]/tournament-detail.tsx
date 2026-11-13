@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BracketStatsSummary } from "@/components/bracket-stats";
 import { ErrorNotice } from "@/components/error-notice";
+import { TitleBar } from "@/components/title-bar";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { api, attempt } from "@/lib/api/client";
 import type { Category } from "@/lib/api/types";
@@ -46,21 +47,23 @@ export async function TournamentDetail({
 
   return (
     <>
-      <header className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            {tournament.data.name}
-          </h1>
-          <TournamentStatusBadge status={tournament.data.status} />
-        </div>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          <time dateTime={tournament.data.date}>
-            {formatDate(tournament.data.date)}
-          </time>
-          {" · "}
-          {tournament.data.location}
-        </p>
-      </header>
+      <TitleBar
+        title={tournament.data.name}
+        parentHref="/"
+        parentLabel="Torneos"
+        subtitle={
+          <div className="flex flex-col items-start gap-2">
+            <TournamentStatusBadge status={tournament.data.status} />
+            <p>
+              <time dateTime={tournament.data.date}>
+                {formatDate(tournament.data.date)}
+              </time>
+              {" · "}
+              {tournament.data.location}
+            </p>
+          </div>
+        }
+      />
 
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-semibold">Categorías</h2>
