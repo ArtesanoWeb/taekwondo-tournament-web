@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   primaryButtonClass,
@@ -15,16 +21,28 @@ type ClubDialogButtonProps = {
   /** Without a club, the dialog creates a new one. */
   club?: Club;
   className: string;
+  /** An icon instead of the text, which then becomes the button's accessible name. */
+  children?: ReactNode;
 };
 
-export function ClubDialogButton({ club, className }: ClubDialogButtonProps) {
+export function ClubDialogButton({
+  club,
+  className,
+  children,
+}: ClubDialogButtonProps) {
+  const label = club ? "Editar" : "Nuevo club";
   // Mounted only while open, so closing discards the form.
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
-        {club ? "Editar" : "Nuevo club"}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={children ? label : undefined}
+        className={className}
+      >
+        {children ?? label}
       </button>
       {open && <ClubDialog club={club} onClose={() => setOpen(false)} />}
     </>

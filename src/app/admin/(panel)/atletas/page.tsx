@@ -8,7 +8,9 @@ import {
   secondaryButtonClass,
 } from "@/components/button-classes";
 import { ErrorNotice } from "@/components/error-notice";
+import { floatingAddClass, PlusIcon } from "@/components/floating-add";
 import { LoadingNotice } from "@/components/loading-notice";
+import { SearchShortcut } from "@/components/search-shortcut";
 import { formatDate } from "@/lib/format";
 import { genderLabels } from "@/lib/labels";
 import { adminAttempt, getAdminApi } from "@/lib/session";
@@ -21,7 +23,8 @@ export default function AdminAthletesPage({
   searchParams,
 }: PageProps<"/admin/atletas">) {
   return (
-    <div className="flex flex-col gap-6">
+    // Below `sm`, room under the list for the floating button.
+    <div className="flex flex-col gap-6 max-sm:pb-20">
       <Suspense fallback={<LoadingNotice label="Cargando atletas…" />}>
         <AthletesSection searchParams={searchParams} />
       </Suspense>
@@ -49,17 +52,22 @@ async function AthletesSection({
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Atletas</h1>
+      {/* The navigation already says where we are; the heading stays for screen readers. */}
+      <h1 className="sr-only">Atletas</h1>
+      <div className="hidden justify-end sm:flex">
         <AthleteDialogButton
           clubs={clubs.data}
           className={primaryButtonClass}
         />
       </div>
+      <AthleteDialogButton clubs={clubs.data} className={floatingAddClass}>
+        <PlusIcon />
+      </AthleteDialogButton>
 
       <Form action="/admin/atletas" role="search" className="flex gap-2">
         <input
           key={query}
+          id="athlete-search"
           type="search"
           name="q"
           defaultValue={query}
@@ -71,6 +79,7 @@ async function AthletesSection({
           Buscar
         </button>
       </Form>
+      <SearchShortcut inputId="athlete-search" />
 
       {athletes.data.length === 0 ? (
         <p className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">

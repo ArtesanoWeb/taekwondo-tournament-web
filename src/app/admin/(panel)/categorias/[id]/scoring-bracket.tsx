@@ -27,7 +27,6 @@ export function ScoringBracket({ bracket, roundsToWin }: ScoringBracketProps) {
           {ready.length === 1
             ? "1 combate para anotar"
             : `${ready.length} combates para anotar`}
-          . Toca uno en la llave.
         </p>
       )}
       <BracketView

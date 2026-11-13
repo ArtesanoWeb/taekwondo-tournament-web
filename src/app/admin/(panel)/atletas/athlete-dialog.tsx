@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   primaryButtonClass,
@@ -16,6 +22,10 @@ import { type AthleteState, saveAthlete } from "./actions";
 
 const inputClass =
   "rounded-md border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-100 dark:focus:ring-zinc-100/10";
+
+// Android Chrome draws date inputs natively (own width and border): `appearance-none` lets them
+// look and stretch like the other fields; the min height keeps an empty one from collapsing.
+const dateInputClass = `${inputClass} min-h-[2.625rem] w-full appearance-none text-left [&::-webkit-date-and-time-value]:text-left`;
 const labelClass = "flex flex-col gap-1 text-sm font-medium";
 
 const BELT_SUGGESTIONS = [
@@ -32,20 +42,29 @@ type AthleteDialogButtonProps = {
   athlete?: Athlete;
   clubs: Club[];
   className: string;
+  /** An icon instead of the text, which then becomes the button's accessible name. */
+  children?: ReactNode;
 };
 
 export function AthleteDialogButton({
   athlete,
   clubs,
   className,
+  children,
 }: AthleteDialogButtonProps) {
+  const label = athlete ? "Editar" : "Nuevo atleta";
   // Mounted only while open: the list can have many athletes, and closing discards all form state.
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
-        {athlete ? "Editar" : "Nuevo atleta"}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={children ? label : undefined}
+        className={className}
+      >
+        {children ?? label}
       </button>
       {open && (
         <AthleteDialog
@@ -136,7 +155,7 @@ function AthleteDialog({ athlete, clubs, onClose }: AthleteDialogProps) {
               type="date"
               required
               defaultValue={values.birthDate}
-              className={inputClass}
+              className={dateInputClass}
             />
           </label>
           <label className={labelClass}>
