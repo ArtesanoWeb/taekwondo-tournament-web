@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type ReactNode, Suspense, useRef } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { hidesBottomNavOnPhone } from "@/lib/phone-screens";
-
-import { logout } from "../actions";
 
 const iconProps = {
   "aria-hidden": true,
@@ -52,12 +50,17 @@ const menuIcon = (
   </svg>
 );
 
+const medalIcon = (
+  <svg {...iconProps}>
+    <circle cx="12" cy="15" r="6" />
+    <path d="M8.5 10.5 6 2h4l2 5 2-5h4l-2.5 8.5" />
+  </svg>
+);
+
 const itemClass =
   "flex h-16 w-full flex-col items-center justify-center gap-0.5 text-xs";
 const inactiveClass = "text-zinc-600 dark:text-zinc-400";
 const activeClass = "font-semibold text-blue-600 dark:text-blue-400";
-const sheetRowClass =
-  "block w-full rounded-md px-3 py-3 text-left text-base hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800 dark:active:bg-zinc-800";
 
 function Tab({
   href,
@@ -84,31 +87,61 @@ function Tab({
   );
 }
 
-function Tabs({ pathname }: { pathname: string }) {
-  // A category is reached from its tournament, so it belongs to the same tab.
-  const inTournaments =
-    pathname.startsWith("/admin/torneos") ||
-    pathname.startsWith("/admin/categorias");
+/** Torneos, the most used, sits in the middle in a raised circle. */
+function CenterTab({ active }: { active: boolean }) {
+  return (
+    <li>
+      <Link
+        href="/admin/torneos"
+        aria-current={active ? "page" : undefined}
+        className={`${itemClass} ${active ? activeClass : inactiveClass}`}
+      >
+        <span
+          className={`ring-background -mt-7 flex size-13 items-center justify-center rounded-full text-white shadow-lg ring-4 ${
+            active
+              ? "bg-blue-600 dark:bg-blue-500"
+              : "bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900"
+          }`}
+        >
+          {trophyIcon}
+        </span>
+        Torneos
+      </Link>
+    </li>
+  );
+}
 
+function Tabs({ pathname }: { pathname: string }) {
+  const active = (prefix: string) => pathname.startsWith(prefix);
   return (
     <>
-      <Tab
-        href="/admin/torneos"
-        label="Torneos"
-        icon={trophyIcon}
-        active={inTournaments}
-      />
       <Tab
         href="/admin/atletas"
         label="Atletas"
         icon={usersIcon}
-        active={pathname.startsWith("/admin/atletas")}
+        active={active("/admin/atletas")}
       />
       <Tab
         href="/admin/clubes"
         label="Clubes"
         icon={shieldIcon}
-        active={pathname.startsWith("/admin/clubes")}
+        active={active("/admin/clubes")}
+      />
+      {/* A category is reached from its tournament, so it belongs to the same tab. */}
+      <CenterTab
+        active={active("/admin/torneos") || active("/admin/categorias")}
+      />
+      <Tab
+        href="/admin/rankings"
+        label="Rankings"
+        icon={medalIcon}
+        active={active("/admin/rankings")}
+      />
+      <Tab
+        href="/admin/mas"
+        label="Más"
+        icon={menuIcon}
+        active={active("/admin/mas")}
       />
     </>
   );
@@ -133,51 +166,16 @@ function CurrentBottomNav() {
 }
 
 function BottomNavBar() {
-  const sheetRef = useRef<HTMLDialogElement>(null);
-  const closeSheet = () => sheetRef.current?.close();
-
   return (
     <nav
       aria-label="Administración"
       className="bg-background fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-zinc-800"
     >
-      <ul className="grid grid-cols-4">
-        {/* The route is request data under Cache Components; the fallback keeps the bar in the shell. */}
+      <ul className="grid grid-cols-5">
         <Suspense fallback={<Tabs pathname="" />}>
           <CurrentTabs />
         </Suspense>
-        <li>
-          <button
-            type="button"
-            onClick={() => sheetRef.current?.showModal()}
-            className={`${itemClass} ${inactiveClass}`}
-          >
-            {menuIcon}
-            Más
-          </button>
-        </li>
       </ul>
-
-      {/* A click on the backdrop targets the dialog itself; the content is wrapped so it doesn't. */}
-      <dialog
-        ref={sheetRef}
-        aria-label="Más opciones"
-        onClick={(event) => {
-          if (event.target === sheetRef.current) closeSheet();
-        }}
-        className="mt-auto mb-0 w-full max-w-none rounded-t-2xl bg-white text-zinc-950 backdrop:bg-black/50 dark:bg-zinc-900 dark:text-zinc-50"
-      >
-        <div className="flex flex-col gap-1 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-          <Link href="/" onClick={closeSheet} className={sheetRowClass}>
-            Ver sitio
-          </Link>
-          <form action={logout}>
-            <button type="submit" className={sheetRowClass}>
-              Cerrar sesión
-            </button>
-          </form>
-        </div>
-      </dialog>
     </nav>
   );
 }
