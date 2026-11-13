@@ -4,11 +4,10 @@ import { Suspense } from "react";
 
 import { ErrorNotice } from "@/components/error-notice";
 import { LoadingNotice } from "@/components/loading-notice";
-import { TournamentStatusBadge } from "@/components/tournament-status-badge";
+import { TitleBar } from "@/components/title-bar";
 import type { Category } from "@/lib/api/types";
 import { pendingMatchCount } from "@/lib/bracket";
 import { formatAgeRange, groupByGender } from "@/lib/categories";
-import { formatDate } from "@/lib/format";
 import { genderLabels } from "@/lib/labels";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
@@ -20,12 +19,6 @@ export default function AdminTournamentPage({
 }: PageProps<"/admin/torneos/[id]">) {
   return (
     <div className="flex flex-col gap-6">
-      <Link
-        href="/admin/torneos"
-        className="w-fit text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← Torneos
-      </Link>
       <Suspense fallback={<LoadingNotice label="Cargando torneo…" />}>
         <AdminTournamentDetail params={params} />
       </Suspense>
@@ -97,34 +90,13 @@ async function AdminTournamentDetail({
     }),
   );
 
-  const athletes = [...summaries.values()].reduce(
-    (total, summary) => total + summary.registered,
-    0,
-  );
-
   return (
     <>
-      <header className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <div>
-          <TournamentStatusBadge status={tournament.data.status} />
-        </div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {tournament.data.name}
-        </h1>
-        <div className="flex flex-col gap-0.5 text-zinc-600 dark:text-zinc-400">
-          <time dateTime={tournament.data.date}>
-            {formatDate(tournament.data.date)}
-          </time>
-          <span>{tournament.data.location}</span>
-          <span>{athletes === 1 ? "1 atleta" : `${athletes} atletas`}</span>
-        </div>
-        <Link
-          href={`/torneos/${tournament.data.id}`}
-          className="w-fit text-sm font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
-        >
-          Ver en el sitio público
-        </Link>
-      </header>
+      <TitleBar
+        title={tournament.data.name}
+        parentHref="/admin/torneos"
+        parentLabel="Torneos"
+      />
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

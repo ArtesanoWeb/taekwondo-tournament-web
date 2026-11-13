@@ -9,6 +9,8 @@ import type { ReactNode } from "react";
  */
 const phoneScreensWithoutHeader = [
   /^\/admin\/torneos\/nuevo$/,
+  /^\/admin\/torneos\/\d+$/,
+  /^\/admin\/categorias\/\d+$/,
 ];
 
 export function HeaderFrame({
