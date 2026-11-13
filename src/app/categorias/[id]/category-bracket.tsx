@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BracketView } from "@/components/bracket-view";
 import { ErrorNotice } from "@/components/error-notice";
+import { TitleBar } from "@/components/title-bar";
 import { api, attempt } from "@/lib/api/client";
 import { formatAgeRange } from "@/lib/categories";
 import { formatDateTime } from "@/lib/format";
@@ -39,25 +39,20 @@ export async function CategoryBracket({
 
   return (
     <>
-      <Link
-        href={`/torneos/${category.data.tournament_id}`}
-        className="w-fit text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← {tournament.ok ? tournament.data.name : "Volver al torneo"}
-      </Link>
-
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {category.data.age_label} · {category.data.weight_label}
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          {genderLabels[category.data.gender]}
-          {" · "}
-          {formatAgeRange(category.data.min_age, category.data.max_age)}
-          {" · "}
-          {beltGroupLabels[category.data.belt_group]}
-        </p>
-      </header>
+      <TitleBar
+        title={`${category.data.age_label} · ${category.data.weight_label}`}
+        parentHref={`/torneos/${category.data.tournament_id}`}
+        parentLabel={tournament.ok ? tournament.data.name : "Torneo"}
+        subtitle={
+          <p>
+            {genderLabels[category.data.gender]}
+            {" · "}
+            {formatAgeRange(category.data.min_age, category.data.max_age)}
+            {" · "}
+            {beltGroupLabels[category.data.belt_group]}
+          </p>
+        }
+      />
 
       {category.data.has_bracket ? (
         bracket.ok ? (

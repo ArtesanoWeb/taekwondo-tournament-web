@@ -37,7 +37,7 @@ type TitleBarProps = {
 };
 
 /**
- * The title of an admin screen. On phones the site header is hidden on these screens (see
+ * The title of a detail screen or full-screen form. On phones the site header is hidden on these screens (see
  * `HeaderFrame`), so the title becomes the screen's bar: the way out on its left and a
  * full-width line under it, with the subtitle below that line. On larger screens it's a
  * "← parent" link above the title.
