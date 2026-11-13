@@ -4,6 +4,7 @@ import type { Match } from "@/lib/api/types";
 
 import {
   bracketStats,
+  champion,
   currentRoundIndex,
   groupRounds,
   matchesToScore,
@@ -175,5 +176,42 @@ describe("bracketStats", () => {
 
   it("is zero without matches", () => {
     expect(bracketStats([])).toEqual({ matches: 0, athletes: 0 });
+  });
+});
+
+describe("champion", () => {
+  const semis = [
+    match(1, 1, 0, { status: "finished", winner_id: 10 }),
+    match(2, 1, 1, { status: "finished", winner_id: 20 }),
+  ];
+
+  it("is the winner of the final", () => {
+    const final = match(3, 2, 0, {
+      athlete_red_id: 10,
+      athlete_red_name: "Ana",
+      athlete_blue_id: 20,
+      athlete_blue_name: "Bea",
+      status: "finished",
+      winner_id: 20,
+      winner_name: "Bea",
+    });
+    expect(champion([final, ...semis])).toEqual({ id: 20, name: "Bea" });
+  });
+
+  it("takes the name from the winning side when the API doesn't send it", () => {
+    const final = match(3, 2, 0, {
+      athlete_red_id: 10,
+      athlete_red_name: "Ana",
+      athlete_blue_id: 20,
+      athlete_blue_name: "Bea",
+      status: "finished",
+      winner_id: 10,
+    });
+    expect(champion([...semis, final])).toEqual({ id: 10, name: "Ana" });
+  });
+
+  it("is null while the final hasn't been fought", () => {
+    expect(champion([...semis, match(3, 2, 0)])).toBeNull();
+    expect(champion([])).toBeNull();
   });
 });
