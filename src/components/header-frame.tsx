@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { hidesHeaderOnPhone } from "@/lib/phone-screens";
 
-/** The site header, hidden on phones on the admin's full-screen views (see `phone-screens`). */
+/** The site header, hidden on phones on full-screen views (see `phone-screens`). */
 export function HeaderFrame({
   className,
   children,

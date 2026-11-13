@@ -7,12 +7,14 @@ describe("phone screens", () => {
     expect(hidesHeaderOnPhone("/admin/torneos/nuevo")).toBe(true);
     expect(hidesHeaderOnPhone("/admin/torneos/4")).toBe(true);
     expect(hidesHeaderOnPhone("/admin/categorias/10")).toBe(true);
+    expect(hidesHeaderOnPhone("/torneos/4")).toBe(true);
+    expect(hidesHeaderOnPhone("/categorias/10")).toBe(true);
   });
 
-  it("keeps the header on lists and on the public site", () => {
+  it("keeps the header on lists", () => {
     expect(hidesHeaderOnPhone("/admin/torneos")).toBe(false);
     expect(hidesHeaderOnPhone("/admin/atletas")).toBe(false);
-    expect(hidesHeaderOnPhone("/torneos/4")).toBe(false);
+    expect(hidesHeaderOnPhone("/")).toBe(false);
     expect(hidesHeaderOnPhone("/admin/torneos/4/algo")).toBe(false);
   });
 
