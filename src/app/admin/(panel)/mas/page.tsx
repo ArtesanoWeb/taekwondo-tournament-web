@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { LogoutButton } from "@/components/logout-button";
 import { getSessionUsername } from "@/lib/session";
 import { fetchApiVersion, webVersion } from "@/lib/versions";
-
-import { LogoutButton } from "../logout-button";
 
 export const metadata: Metadata = { title: "Más" };
 

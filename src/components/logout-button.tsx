@@ -4,7 +4,7 @@ import { type ReactNode, useRef } from "react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
-import { logout } from "../actions";
+import { logout } from "@/app/admin/actions";
 
 /** Logs out after a confirmation. The look comes from the caller: a row, an icon… */
 export function LogoutButton({
