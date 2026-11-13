@@ -87,7 +87,7 @@ function Tab({
   );
 }
 
-/** Torneos, the most used, sits in the middle in a raised circle. */
+/** Torneos, the most used, sits in the middle in a raised blue circle. */
 function CenterTab({ active }: { active: boolean }) {
   return (
     <li>
@@ -96,13 +96,8 @@ function CenterTab({ active }: { active: boolean }) {
         aria-current={active ? "page" : undefined}
         className={`${itemClass} ${active ? activeClass : inactiveClass}`}
       >
-        <span
-          className={`ring-background -mt-7 flex size-13 items-center justify-center rounded-full text-white shadow-lg ring-4 ${
-            active
-              ? "bg-blue-600 dark:bg-blue-500"
-              : "bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900"
-          }`}
-        >
+        {/* Always blue; the label shows whether it's the active tab. */}
+        <span className="ring-background -mt-7 flex size-13 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg ring-4 dark:bg-blue-500">
           {trophyIcon}
         </span>
         Torneos
