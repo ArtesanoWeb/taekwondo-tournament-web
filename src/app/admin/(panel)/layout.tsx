@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/admin/torneos", label: "Torneos" },
   { href: "/admin/atletas", label: "Atletas" },
   { href: "/admin/clubes", label: "Clubes" },
+  { href: "/admin/rankings", label: "Rankings" },
   { href: "/", label: "Ver sitio" },
 ];
 
