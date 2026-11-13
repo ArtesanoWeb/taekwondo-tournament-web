@@ -16,8 +16,9 @@ export const metadata: Metadata = { title: "Clubes" };
 export default function AdminClubsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Clubes</h1>
+      {/* The navigation already says where we are; the heading stays for screen readers. */}
+      <h1 className="sr-only">Clubes</h1>
+      <div className="flex justify-end">
         <ClubDialogButton className={primaryButtonClass} />
       </div>
       <Suspense fallback={<LoadingNotice label="Cargando clubes…" />}>

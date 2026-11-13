@@ -49,8 +49,9 @@ async function AthletesSection({
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Atletas</h1>
+      {/* The navigation already says where we are; the heading stays for screen readers. */}
+      <h1 className="sr-only">Atletas</h1>
+      <div className="flex justify-end">
         <AthleteDialogButton
           clubs={clubs.data}
           className={primaryButtonClass}
