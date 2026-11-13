@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   primaryButtonClass,
@@ -36,20 +42,29 @@ type AthleteDialogButtonProps = {
   athlete?: Athlete;
   clubs: Club[];
   className: string;
+  /** An icon instead of the text, which then becomes the button's accessible name. */
+  children?: ReactNode;
 };
 
 export function AthleteDialogButton({
   athlete,
   clubs,
   className,
+  children,
 }: AthleteDialogButtonProps) {
+  const label = athlete ? "Editar" : "Nuevo atleta";
   // Mounted only while open: the list can have many athletes, and closing discards all form state.
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
-        {athlete ? "Editar" : "Nuevo atleta"}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={children ? label : undefined}
+        className={className}
+      >
+        {children ?? label}
       </button>
       {open && (
         <AthleteDialog

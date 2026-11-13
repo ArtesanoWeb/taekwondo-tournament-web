@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { ErrorNotice } from "@/components/error-notice";
+import { floatingAddClass, PlusIcon } from "@/components/floating-add";
 import { LoadingNotice } from "@/components/loading-notice";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { formatDate } from "@/lib/format";
@@ -30,24 +31,12 @@ export default function AdminTournamentsPage({
           Nuevo torneo
         </Link>
       </div>
-      {/* Floating button within thumb reach, just above the bottom bar. */}
       <Link
         href="/admin/torneos/nuevo"
         aria-label="Nuevo torneo"
-        className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 flex size-14 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg active:bg-zinc-700 sm:hidden dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
+        className={floatingAddClass}
       >
-        <svg
-          aria-hidden
-          width={28}
-          height={28}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-        >
-          <path d="M12 5v14M5 12h14" />
-        </svg>
+        <PlusIcon />
       </Link>
       <Suspense fallback={<LoadingNotice label="Cargando torneos…" />}>
         <AdminTournamentList searchParams={searchParams} />

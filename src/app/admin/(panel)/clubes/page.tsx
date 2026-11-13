@@ -6,6 +6,7 @@ import {
   secondaryButtonClass,
 } from "@/components/button-classes";
 import { ErrorNotice } from "@/components/error-notice";
+import { floatingAddClass, PlusIcon } from "@/components/floating-add";
 import { LoadingNotice } from "@/components/loading-notice";
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
@@ -15,12 +16,16 @@ export const metadata: Metadata = { title: "Clubes" };
 
 export default function AdminClubsPage() {
   return (
-    <div className="flex flex-col gap-6">
+    // Below `sm`, room under the list for the floating button.
+    <div className="flex flex-col gap-6 max-sm:pb-20">
       {/* The navigation already says where we are; the heading stays for screen readers. */}
       <h1 className="sr-only">Clubes</h1>
-      <div className="flex justify-end">
+      <div className="hidden justify-end sm:flex">
         <ClubDialogButton className={primaryButtonClass} />
       </div>
+      <ClubDialogButton className={floatingAddClass}>
+        <PlusIcon />
+      </ClubDialogButton>
       <Suspense fallback={<LoadingNotice label="Cargando clubes…" />}>
         <ClubList />
       </Suspense>
