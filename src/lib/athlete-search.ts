@@ -1,4 +1,4 @@
-import type { Athlete } from "@/lib/api/types";
+import type { Athlete, Gender } from "@/lib/api/types";
 
 /** Lowercase and without accents, like the API's search: `perez` finds `Pérez`. */
 export function normalize(text: string): string {
@@ -15,6 +15,30 @@ export function matchesQuery(athlete: Athlete, query: string): boolean {
   return (
     normalize(athlete.name).includes(wanted) ||
     (athlete.ci ?? "").toLowerCase().includes(wanted)
+  );
+}
+
+export type AthleteFilters = {
+  query: string;
+  clubId: number | null;
+  gender: Gender | null;
+};
+
+export const NO_FILTERS: AthleteFilters = {
+  query: "",
+  clubId: null,
+  gender: null,
+};
+
+export function filterAthletes(
+  athletes: Athlete[],
+  { query, clubId, gender }: AthleteFilters,
+): Athlete[] {
+  return athletes.filter(
+    (athlete) =>
+      (clubId === null || athlete.club_id === clubId) &&
+      (gender === null || athlete.gender === gender) &&
+      matchesQuery(athlete, query),
   );
 }
 

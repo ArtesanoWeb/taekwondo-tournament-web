@@ -4,8 +4,14 @@ import { type FormEvent, useId, useState } from "react";
 
 import { secondaryButtonClass } from "@/components/button-classes";
 import { SearchShortcut } from "@/components/search-shortcut";
-import type { Athlete, Club } from "@/lib/api/types";
-import { compareNames, matchesQuery, suggestions } from "@/lib/athlete-search";
+import type { Athlete, Club, Gender } from "@/lib/api/types";
+import {
+  type AthleteFilters,
+  compareNames,
+  filterAthletes,
+  NO_FILTERS,
+  suggestions,
+} from "@/lib/athlete-search";
 import { formatDate } from "@/lib/format";
 import { genderLabels } from "@/lib/labels";
 
@@ -14,10 +20,16 @@ import { AthleteDialogButton } from "./athlete-dialog";
 const SEARCH_ID = "athlete-search";
 const inputClass =
   "min-w-0 flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-100 dark:focus:ring-zinc-100/10";
+const chipClass = (selected: boolean) =>
+  `rounded-full border px-3 py-1.5 text-sm ${
+    selected
+      ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+      : "border-zinc-300 text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+  }`;
 
 /**
  * The athletes list, searched and filtered here with the whole list already loaded: suggestions
- * while typing (#92).
+ * while typing (#92) and club and gender filters (#94).
  */
 export function AthleteBrowser({
   athletes,
@@ -28,17 +40,22 @@ export function AthleteBrowser({
   clubs: Club[];
   initialQuery: string;
 }) {
-  const [query, setQuery] = useState(initialQuery);
+  const [filters, setFilters] = useState<AthleteFilters>({
+    ...NO_FILTERS,
+    query: initialQuery,
+  });
   // Bumped by "Limpiar" so the search box starts over with an empty text.
   const [resets, setResets] = useState(0);
   const sorted = athletes.toSorted((a, b) => compareNames(a.name, b.name));
-  const shown = sorted.filter((athlete) => matchesQuery(athlete, query));
+  const shown = filterAthletes(sorted, filters);
+  const filtered =
+    filters.query !== "" || filters.clubId !== null || filters.gender !== null;
 
-  const applyQuery = (text: string) => {
-    setQuery(text.trim());
+  const applyQuery = (query: string) => {
+    setFilters((current) => ({ ...current, query: query.trim() }));
     // Kept in the address so a reload or a shared link keeps the search.
     const url = new URL(window.location.href);
-    if (text.trim()) url.searchParams.set("q", text.trim());
+    if (query.trim()) url.searchParams.set("q", query.trim());
     else url.searchParams.delete("q");
     window.history.replaceState(null, "", url);
   };
@@ -48,36 +65,79 @@ export function AthleteBrowser({
       <SearchBox
         key={resets}
         athletes={sorted}
-        appliedQuery={query}
+        appliedQuery={filters.query}
         onApply={applyQuery}
       />
       <SearchShortcut inputId={SEARCH_ID} />
 
-      <p className="text-sm text-zinc-600 dark:text-zinc-400" role="status">
-        {shown.length === 1 ? "1 atleta" : `${shown.length} atletas`}
-        {query && ` para «${query}»`}
-        {query && (
-          <>
-            {" · "}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {(
+            [
+              [null, "Todos"],
+              ["female", genderLabels.female],
+              ["male", genderLabels.male],
+            ] as [Gender | null, string][]
+          ).map(([gender, label]) => (
             <button
+              key={label}
               type="button"
-              onClick={() => {
-                applyQuery("");
-                setResets((count) => count + 1);
-              }}
-              className="font-medium underline underline-offset-2"
+              aria-pressed={filters.gender === gender}
+              onClick={() => setFilters((current) => ({ ...current, gender }))}
+              className={chipClass(filters.gender === gender)}
             >
-              Limpiar
+              {label}
             </button>
-          </>
-        )}
-      </p>
+          ))}
+          <select
+            aria-label="Filtrar por club"
+            value={filters.clubId ?? ""}
+            onChange={(event) =>
+              setFilters((current) => ({
+                ...current,
+                clubId: event.target.value ? Number(event.target.value) : null,
+              }))
+            }
+            className={`${chipClass(filters.clubId !== null)} max-w-full bg-transparent`}
+          >
+            <option value="">Todos los clubes</option>
+            {clubs
+              .toSorted((a, b) => compareNames(a.name, b.name))
+              .map((club) => (
+                <option key={club.id} value={club.id}>
+                  {club.name}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        <p className="text-sm text-zinc-600 dark:text-zinc-400" role="status">
+          {shown.length === 1 ? "1 atleta" : `${shown.length} atletas`}
+          {filters.query && ` para «${filters.query}»`}
+          {filtered && (
+            <>
+              {" · "}
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters(NO_FILTERS);
+                  applyQuery("");
+                  setResets((count) => count + 1);
+                }}
+                className="font-medium underline underline-offset-2"
+              >
+                Limpiar
+              </button>
+            </>
+          )}
+        </p>
+      </div>
 
       {shown.length === 0 ? (
         <p className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
           {athletes.length === 0
             ? "Todavía no hay atletas."
-            : `No se encontraron atletas para «${query}».`}
+            : "No hay atletas con esa búsqueda o filtros."}
         </p>
       ) : (
         <AthleteList athletes={shown} clubs={clubs} />

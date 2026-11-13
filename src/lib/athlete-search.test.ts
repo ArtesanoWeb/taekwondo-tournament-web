@@ -4,7 +4,9 @@ import type { Athlete } from "@/lib/api/types";
 
 import {
   compareNames,
+  filterAthletes,
   matchesQuery,
+  NO_FILTERS,
   normalize,
   suggestions,
 } from "./athlete-search";
@@ -41,6 +43,22 @@ describe("matchesQuery", () => {
     expect(matchesQuery(athletes[0], "perez")).toBe(true);
     expect(matchesQuery(athletes[0], "4567")).toBe(true);
     expect(matchesQuery(athletes[1], "perez")).toBe(false);
+  });
+});
+
+describe("filterAthletes", () => {
+  it("combines the search with club and gender", () => {
+    expect(
+      filterAthletes(athletes, { ...NO_FILTERS, gender: "female" }).map(
+        (a) => a.id,
+      ),
+    ).toEqual([2, 4]);
+    expect(
+      filterAthletes(athletes, { query: "per", clubId: 2, gender: null }).map(
+        (a) => a.id,
+      ),
+    ).toEqual([2]);
+    expect(filterAthletes(athletes, NO_FILTERS)).toHaveLength(4);
   });
 });
 
