@@ -7,6 +7,14 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-13
+
+### Fixed
+
+- Administración: anotar un round volvió a funcionar con la API 0.6.0, que exige el número del round.
+  Si ese round ya estaba guardado (desde otro celular, o porque la respuesta se perdió y se reenvió),
+  no se guarda dos veces: el combate se recarga con los rounds actualizados y un aviso lo explica.
+
 ## [0.4.0] - 2026-11-09
 
 Preparar y seguir un torneo desde el celular: el admin arma un torneo completo sin tocar el backend,
@@ -133,7 +141,9 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.3.0...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.1...develop
+[0.4.1]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/releases/tag/v0.1.0

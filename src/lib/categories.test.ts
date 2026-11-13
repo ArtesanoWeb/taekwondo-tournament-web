@@ -17,6 +17,7 @@ const category = (id: number, overrides: Partial<Category> = {}): Category => ({
   min_weight: null,
   max_weight: 45,
   rounds_to_win: 2,
+  has_bracket: false,
   ...overrides,
 });
 
