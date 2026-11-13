@@ -98,7 +98,13 @@ export async function withdrawRegistration(
 }
 
 /** The typed values come back on error so the form doesn't lose them. */
-export type RoundState = { error?: string; red?: string; blue?: string };
+export type RoundState = {
+  error?: string;
+  red?: string;
+  blue?: string;
+  /** The match changed meanwhile (another phone, or a retry): reload it before going on. */
+  stale?: boolean;
+};
 
 export async function addRound(
   _previous: RoundState,
@@ -107,7 +113,8 @@ export async function addRound(
   const red = String(formData.get("red") ?? "");
   const blue = String(formData.get("blue") ?? "");
   const matchId = Number(formData.get("matchId"));
-  if (!Number.isInteger(matchId)) {
+  const roundNumber = Number(formData.get("roundNumber"));
+  if (!Number.isInteger(matchId) || !Number.isInteger(roundNumber)) {
     return { error: "No se pudo identificar el combate.", red, blue };
   }
   const parsed = parseRoundPoints(red, blue);
@@ -117,12 +124,33 @@ export async function addRound(
   const result = await adminAttempt(
     api.POST("/api/v1/matches/{match_id}/rounds", {
       params: { path: { match_id: matchId } },
-      body: { red_points: parsed.points.red, blue_points: parsed.points.blue },
+      // The round the admin confirmed: if it was already saved (a retry after a lost
+      // response, or another phone), the API answers 409 instead of saving it twice.
+      body: {
+        round_number: roundNumber,
+        red_points: parsed.points.red,
+        blue_points: parsed.points.blue,
+      },
     }),
   );
-  // 409 when the match already finished (e.g. scored from another phone), 400 if it isn't ready.
-  if (!result.ok) return { error: result.error.message, red, blue };
+  if (!result.ok) {
+    if (isRoundOutOfOrder(result.error)) {
+      return { error: ROUND_OUT_OF_ORDER, stale: true };
+    }
+    // 409 when the match already finished (e.g. scored from another phone), 400 if it isn't ready.
+    return { error: result.error.message, red, blue };
+  }
 
   refresh();
   return {};
+}
+
+const ROUND_OUT_OF_ORDER =
+  "Ese round ya estaba guardado (quizá desde otro celular o por un reenvío). Revisa los rounds actualizados antes de cargar el siguiente.";
+
+/** The API rejects a round that isn't the next one with this 409 message. */
+function isRoundOutOfOrder(error: { status: number; message: string }) {
+  return (
+    error.status === 409 && error.message.startsWith("El round que sigue es el")
+  );
 }

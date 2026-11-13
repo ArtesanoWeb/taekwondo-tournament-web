@@ -115,7 +115,7 @@ export interface paths {
         head?: never;
         /**
          * Actualizar un atleta
-         * @description Modifica solo los campos que se envían (un `null` en un campo que no sea `ci` se ignora). `ci` con `null` o texto vacío lo borra. Si el cambio de **género o peso** afecta inscripciones: en un torneo en curso se rechaza (409) si el atleta deja de cumplir las reglas de su categoría; en un torneo en borrador, si el atleta deja de cumplir las reglas de la categoría hay que confirmar con `confirm_withdrawal=true`, y entonces se lo retira de ella (sin la confirmación responde 409 con las categorías afectadas y no cambia nada); en un torneo finalizado se permite y la inscripción no se toca. Requiere token.
+         * @description Modifica solo los campos que se envían (un `null` en un campo que no sea `ci` se ignora). `ci` con `null` o texto vacío lo borra. Si el cambio de **género o peso** afecta inscripciones: en un torneo en curso se rechaza (409) si el atleta deja de cumplir las reglas de su categoría; en un torneo en `draft` (inscripciones abiertas), si el atleta deja de cumplir las reglas de la categoría hay que confirmar con `confirm_withdrawal=true`, y entonces se lo retira de ella (sin la confirmación responde 409 con las categorías afectadas y no cambia nada); en un torneo finalizado se permite y la inscripción no se toca. Requiere token.
          */
         patch: operations["update_athlete"];
         trace?: never;
@@ -135,7 +135,7 @@ export interface paths {
         put?: never;
         /**
          * Crear un torneo
-         * @description Crea un torneo en estado `draft` (borrador). Requiere token.
+         * @description Crea un torneo en estado `draft` (inscripciones abiertas). Requiere token.
          */
         post: operations["create_tournament"];
         delete?: never;
@@ -252,6 +252,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/categories/{category_id}/registrants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar los inscritos de una categoría
+         * @description Devuelve los atletas inscritos en la categoría, ordenados por nombre, solo con datos públicos: nombre y club (nunca CI, fecha de nacimiento ni peso). Sirve en cualquier estado del torneo; mientras la categoría no tiene llave (`has_bracket: false`) es lo que se muestra al público. Es público.
+         */
+        get: operations["list_category_registrants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/registrations": {
         parameters: {
             query?: never;
@@ -261,7 +281,7 @@ export interface paths {
         };
         /**
          * Listar inscripciones
-         * @description Devuelve las inscripciones con los datos del atleta y de la categoría. Con el parámetro `category_id` devuelve solo las de esa categoría. Incluye fecha de nacimiento y peso de los atletas, por eso requiere token.
+         * @description Devuelve las inscripciones con los datos del atleta y de la categoría. Con `category_id` devuelve solo las de esa categoría y con `tournament_id` solo las de ese torneo; si se envían ambos, se aplican los dos filtros. Incluye fecha de nacimiento y peso de los atletas, por eso requiere token.
          */
         get: operations["list_registrations"];
         put?: never;
@@ -351,7 +371,7 @@ export interface paths {
         put?: never;
         /**
          * Cargar el resultado de un round
-         * @description Solo se pueden cargar resultados con el torneo en curso (409). Solo se envían los puntos de cada lado: el servidor numera los rounds (1, 2, 3…) en el orden en que se cargan. Gana el round el lado con más puntos; un round no puede terminar en empate (422). Cuando un atleta llega a `rounds_to_win` rounds ganados, el combate pasa a `finished` y su ganador avanza a la siguiente ronda. Requiere token.
+         * @description Solo se pueden cargar resultados con el torneo en curso (409). Se envía el número del round y los puntos de cada lado. El número tiene que ser el siguiente al último guardado (1, 2, 3…); si no lo es, responde 409 y no guarda nada: así un reenvío (por ejemplo, porque la respuesta anterior se perdió) no queda guardado como el round siguiente. Gana el round el lado con más puntos; un round no puede terminar en empate (422). Cuando un atleta llega a `rounds_to_win` rounds ganados, el combate pasa a `finished` y su ganador avanza a la siguiente ronda. Requiere token.
          */
         post: operations["create_round_score"];
         delete?: never;
@@ -681,6 +701,11 @@ export interface components {
              * @description Identificador de la categoría.
              */
             id: number;
+            /**
+             * Has Bracket
+             * @description Si la categoría ya tiene la llave generada. Mientras es `false`, lo que se muestra al público es la lista de inscritos (`GET /categories/{id}/registrants`).
+             */
+            has_bracket: boolean;
         };
         /** ClubCreate */
         ClubCreate: {
@@ -806,6 +831,29 @@ export interface components {
          * @enum {string}
          */
         MatchStatus: "pending" | "bye" | "finished";
+        /**
+         * RegistrantRead
+         * @description Inscrito de una categoría, solo con datos públicos: sin CI, fecha de nacimiento ni peso.
+         */
+        RegistrantRead: {
+            /**
+             * Athlete Id
+             * @description Id del atleta.
+             */
+            athlete_id: number;
+            /**
+             * Name
+             * @description Nombre del atleta.
+             * @example Mateo Quispe Mamani
+             */
+            name: string;
+            /**
+             * Club
+             * @description Nombre del club del atleta.
+             * @example Dojang Central
+             */
+            club: string;
+        };
         /** RegistrationCreate */
         RegistrationCreate: {
             /**
@@ -844,6 +892,12 @@ export interface components {
         /** RoundScoreCreate */
         RoundScoreCreate: {
             /**
+             * Round Number
+             * @description Número del round que se está cargando: el siguiente al último guardado (1 si no hay ninguno).
+             * @example 1
+             */
+            round_number: number;
+            /**
              * Red Points
              * @description Puntos del lado rojo en este round.
              * @example 12
@@ -858,6 +912,12 @@ export interface components {
         };
         /** RoundScoreRead */
         RoundScoreRead: {
+            /**
+             * Round Number
+             * @description Número del round dentro del combate, desde 1.
+             * @example 1
+             */
+            round_number: number;
             /**
              * Red Points
              * @description Puntos del lado rojo en este round.
@@ -880,12 +940,6 @@ export interface components {
              * @description Id del combate al que pertenece el round.
              */
             match_id: number;
-            /**
-             * Round Number
-             * @description Número del round dentro del combate, desde 1. Lo asigna el servidor en el orden en que se cargan.
-             * @example 1
-             */
-            round_number: number;
             /**
              * Round Winner Id
              * @description Atleta que ganó el round: el del lado con más puntos.
@@ -965,7 +1019,7 @@ export interface components {
         };
         /**
          * TournamentStatus
-         * @description Estado del torneo: `draft` (borrador: se crean las categorías y se inscribe a los atletas),
+         * @description Estado del torneo: `draft` (inscripciones abiertas: se crean las categorías y se inscribe a los atletas),
          *     `in_progress` (en curso: ya no se crean categorías ni se inscribe) y `finished` (finalizado). El estado
          *     solo avanza en ese orden; no se vuelve a uno anterior.
          * @enum {string}
@@ -1379,7 +1433,7 @@ export interface operations {
     update_athlete: {
         parameters: {
             query?: {
-                /** @description Confirma que el atleta sea retirado de las categorías de torneos en borrador donde ya no encaja. */
+                /** @description Confirma que el atleta sea retirado de las categorías de torneos en `draft` (inscripciones abiertas) donde ya no encaja. */
                 confirm_withdrawal?: boolean;
             };
             header?: never;
@@ -1843,10 +1897,51 @@ export interface operations {
             };
         };
     };
+    list_category_registrants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrantRead"][];
+                };
+            };
+            /** @description La categoría no existe. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_registrations: {
         parameters: {
             query?: {
                 category_id?: number | null;
+                tournament_id?: number | null;
             };
             header?: never;
             path?: never;
@@ -2197,7 +2292,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description El torneo no está en curso, o el combate ya terminó y no admite más rounds. */
+            /** @description El torneo no está en curso, el combate ya terminó, o el número de round no es el siguiente. */
             409: {
                 headers: {
                     [name: string]: unknown;
