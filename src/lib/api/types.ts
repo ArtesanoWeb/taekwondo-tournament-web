@@ -7,6 +7,8 @@ export type Athlete = Schemas["AthleteRead"];
 export type Tournament = Schemas["TournamentRead"];
 export type Category = Schemas["CategoryRead"];
 export type Registration = Schemas["RegistrationRead"];
+/** A registered athlete as the public sees it: name and club only. */
+export type Registrant = Schemas["RegistrantRead"];
 export type Bracket = Schemas["BracketRead"];
 export type Match = Schemas["MatchRead"];
 export type RoundScore = Schemas["RoundScoreRead"];
