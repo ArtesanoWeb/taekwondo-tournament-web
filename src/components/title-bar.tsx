@@ -39,7 +39,8 @@ type TitleBarProps = {
 /**
  * The title of an admin screen. On phones the site header is hidden on these screens (see
  * `HeaderFrame`), so the title becomes the screen's bar: the way out on its left and a
- * full-width line under it. On larger screens it's a "← parent" link above the title.
+ * full-width line under it, with the subtitle below that line. On larger screens it's a
+ * "← parent" link above the title.
  */
 export function TitleBar({
   title,
@@ -49,28 +50,28 @@ export function TitleBar({
   subtitle,
 }: TitleBarProps) {
   return (
-    <header className="flex flex-col gap-1 max-sm:-mx-4 max-sm:border-b max-sm:border-zinc-200 max-sm:px-4 max-sm:pb-4 dark:max-sm:border-zinc-800">
-      <Link
-        href={parentHref}
-        className="hidden w-fit text-sm text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline sm:block dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← {parentLabel}
-      </Link>
-      <div className="flex items-center gap-3">
+    <header className="flex flex-col gap-1 max-sm:gap-4">
+      <div className="flex flex-col gap-1 max-sm:-mx-4 max-sm:border-b max-sm:border-zinc-200 max-sm:px-4 max-sm:pb-4 dark:max-sm:border-zinc-800">
         <Link
           href={parentHref}
-          aria-label={`${icon === "close" ? "Cerrar y volver" : "Volver"} a ${parentLabel}`}
-          className="-m-2 shrink-0 rounded-full p-2 text-zinc-600 active:bg-zinc-100 sm:hidden dark:text-zinc-400 dark:active:bg-zinc-800"
+          className="hidden w-fit text-sm text-zinc-600 underline-offset-2 hover:text-zinc-950 hover:underline sm:block dark:text-zinc-400 dark:hover:text-zinc-50"
         >
-          {icons[icon]}
+          ← {parentLabel}
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      </div>
-      {/* Aligned with the title on phones: icon (1.5rem) + gap (0.75rem). */}
-      {subtitle && (
-        <div className="text-zinc-600 max-sm:pl-9 dark:text-zinc-400">
-          {subtitle}
+        <div className="flex items-center gap-3">
+          <Link
+            href={parentHref}
+            aria-label={`${icon === "close" ? "Cerrar y volver" : "Volver"} a ${parentLabel}`}
+            className="-m-2 shrink-0 rounded-full p-2 text-zinc-600 active:bg-zinc-100 sm:hidden dark:text-zinc-400 dark:active:bg-zinc-800"
+          >
+            {icons[icon]}
+          </Link>
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
         </div>
+      </div>
+      {/* Under the line on phones: the bar keeps only the way out and the title. */}
+      {subtitle && (
+        <div className="text-zinc-600 dark:text-zinc-400">{subtitle}</div>
       )}
     </header>
   );
