@@ -60,6 +60,7 @@ function ScoreDialog({
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [notice, setNotice] = useState<string>();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -88,6 +89,8 @@ function ScoreDialog({
           roundName={roundName}
           roundsToWin={roundsToWin}
           onCancel={() => dialogRef.current?.close()}
+          notice={notice}
+          onNoticeChange={setNotice}
         />
       </div>
     </dialog>

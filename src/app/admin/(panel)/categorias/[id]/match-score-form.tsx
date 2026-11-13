@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useActionState, useRef, useState } from "react";
 
 import {
@@ -20,6 +21,9 @@ type MatchScoreFormProps = {
   roundName: string;
   roundsToWin: number;
   onCancel: () => void;
+  /** Kept by the dialog, which outlives this form when it remounts with the reloaded match. */
+  notice?: string;
+  onNoticeChange: (notice?: string) => void;
 };
 
 export function MatchScoreForm({
@@ -27,9 +31,20 @@ export function MatchScoreForm({
   roundName,
   roundsToWin,
   onCancel,
+  notice,
+  onNoticeChange,
 }: MatchScoreFormProps) {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState<RoundState, FormData>(
-    addRound,
+    async (previous, formData) => {
+      const result = await addRound(previous, formData);
+      if (result.stale) {
+        // Reloading remounts this form with the new rounds, so the dialog keeps the message.
+        onNoticeChange(result.error);
+        router.refresh();
+      }
+      return result;
+    },
     {},
   );
   const [localError, setLocalError] = useState<string>();
@@ -50,6 +65,7 @@ export function MatchScoreForm({
       return;
     }
     setLocalError(undefined);
+    onNoticeChange(undefined);
     setPreview(parsed.points);
     dialogRef.current?.showModal();
   };
@@ -60,6 +76,7 @@ export function MatchScoreForm({
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="matchId" value={match.id} />
+      <input type="hidden" name="roundNumber" value={nextRound} />
       <div className="flex items-baseline justify-between gap-3 text-sm">
         <h3 className="font-semibold">
           {roundName} · Combate {match.slot + 1}
@@ -93,7 +110,7 @@ export function MatchScoreForm({
         </ol>
       )}
 
-      <FormError message={localError ?? state.error} />
+      <FormError message={localError ?? state.error ?? notice} />
 
       <button
         type="button"
