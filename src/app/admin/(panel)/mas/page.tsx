@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { getSessionUsername } from "@/lib/session";
+import { fetchApiVersion, webVersion } from "@/lib/versions";
 
 import { LogoutButton } from "../logout-button";
 
@@ -47,6 +48,37 @@ export default function MorePage() {
         </li>
       </ul>
 
+      <section aria-labelledby="acerca-de" className="flex flex-col gap-2">
+        <h2
+          id="acerca-de"
+          className="px-1 text-sm font-semibold tracking-wide text-zinc-500 uppercase"
+        >
+          Acerca de
+        </h2>
+        <dl className={groupClass}>
+          <div className="flex items-center justify-between px-4 py-3.5">
+            <dt>Aplicación</dt>
+            <dd className="text-zinc-600 dark:text-zinc-400">
+              Torneos de Taekwondo
+            </dd>
+          </div>
+          <div className="flex items-center justify-between px-4 py-3.5">
+            <dt>Versión web</dt>
+            <dd className="text-zinc-600 tabular-nums dark:text-zinc-400">
+              v{webVersion}
+            </dd>
+          </div>
+          <div className="flex items-center justify-between px-4 py-3.5">
+            <dt>Versión de la API</dt>
+            <dd className="text-zinc-600 tabular-nums dark:text-zinc-400">
+              <Suspense fallback="…">
+                <ApiVersion />
+              </Suspense>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
       <div className={groupClass}>
         <LogoutButton
           className={`${rowClass} font-medium text-red-600 dark:text-red-400`}
@@ -86,4 +118,9 @@ function ProfileCard({ username }: { username: string }) {
       </span>
     </section>
   );
+}
+
+async function ApiVersion() {
+  const version = await fetchApiVersion();
+  return version ? `v${version}` : "Sin conexión";
 }
