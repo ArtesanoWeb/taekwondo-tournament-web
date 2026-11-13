@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, Suspense, useRef } from "react";
 
+import { hidesBottomNavOnPhone } from "@/lib/phone-screens";
+
 import { logout } from "../actions";
 
 const iconProps = {
@@ -104,8 +106,21 @@ function CurrentTabs() {
   return <Tabs pathname={usePathname()} />;
 }
 
-/** Thumb-reach navigation for phones. */
+/** Thumb-reach navigation for phones, except on full-screen forms (see `phone-screens`). */
 export function BottomNav() {
+  return (
+    // The route is request data under Cache Components; the fallback keeps the bar in the shell.
+    <Suspense fallback={<BottomNavBar />}>
+      <CurrentBottomNav />
+    </Suspense>
+  );
+}
+
+function CurrentBottomNav() {
+  return hidesBottomNavOnPhone(usePathname()) ? null : <BottomNavBar />;
+}
+
+function BottomNavBar() {
   const sheetRef = useRef<HTMLDialogElement>(null);
   const closeSheet = () => sheetRef.current?.close();
 

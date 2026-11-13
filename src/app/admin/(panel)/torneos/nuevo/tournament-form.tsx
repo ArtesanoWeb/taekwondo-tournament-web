@@ -67,9 +67,10 @@ export function TournamentForm() {
       </p>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        {/* On phones the X on the title already closes the form. */}
         <Link
           href="/admin/torneos"
-          className="rounded-md border border-zinc-300 px-4 py-2.5 text-center font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
+          className="hidden rounded-md border border-zinc-300 px-4 py-2.5 text-center font-medium hover:bg-zinc-100 sm:block dark:border-zinc-700 dark:hover:bg-zinc-900"
         >
           Cancelar
         </Link>
