@@ -40,6 +40,12 @@ const usersIcon = (
   </svg>
 );
 
+const shieldIcon = (
+  <svg {...iconProps}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+  </svg>
+);
+
 const menuIcon = (
   <svg {...iconProps}>
     <path d="M4 6h16M4 12h16M4 18h16" />
@@ -98,6 +104,12 @@ function Tabs({ pathname }: { pathname: string }) {
         icon={usersIcon}
         active={pathname.startsWith("/admin/atletas")}
       />
+      <Tab
+        href="/admin/clubes"
+        label="Clubes"
+        icon={shieldIcon}
+        active={pathname.startsWith("/admin/clubes")}
+      />
     </>
   );
 }
@@ -129,7 +141,7 @@ function BottomNavBar() {
       aria-label="Administración"
       className="bg-background fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 pb-[env(safe-area-inset-bottom)] sm:hidden dark:border-zinc-800"
     >
-      <ul className="grid grid-cols-3">
+      <ul className="grid grid-cols-4">
         {/* The route is request data under Cache Components; the fallback keeps the bar in the shell. */}
         <Suspense fallback={<Tabs pathname="" />}>
           <CurrentTabs />
@@ -156,13 +168,6 @@ function BottomNavBar() {
         className="mt-auto mb-0 w-full max-w-none rounded-t-2xl bg-white text-zinc-950 backdrop:bg-black/50 dark:bg-zinc-900 dark:text-zinc-50"
       >
         <div className="flex flex-col gap-1 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-          <Link
-            href="/admin/clubes"
-            onClick={closeSheet}
-            className={sheetRowClass}
-          >
-            Clubes
-          </Link>
           <Link href="/" onClick={closeSheet} className={sheetRowClass}>
             Ver sitio
           </Link>
