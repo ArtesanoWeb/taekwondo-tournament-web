@@ -10,6 +10,7 @@ import {
 import { ErrorNotice } from "@/components/error-notice";
 import { floatingAddClass, PlusIcon } from "@/components/floating-add";
 import { LoadingNotice } from "@/components/loading-notice";
+import { SearchShortcut } from "@/components/search-shortcut";
 import { formatDate } from "@/lib/format";
 import { genderLabels } from "@/lib/labels";
 import { adminAttempt, getAdminApi } from "@/lib/session";
@@ -66,6 +67,7 @@ async function AthletesSection({
       <Form action="/admin/atletas" role="search" className="flex gap-2">
         <input
           key={query}
+          id="athlete-search"
           type="search"
           name="q"
           defaultValue={query}
@@ -77,6 +79,7 @@ async function AthletesSection({
           Buscar
         </button>
       </Form>
+      <SearchShortcut inputId="athlete-search" />
 
       {athletes.data.length === 0 ? (
         <p className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
