@@ -10,7 +10,12 @@ import {
   createApiClient,
   type Result,
 } from "./api/client";
-import { isTokenExpired, loginUrl, SESSION_COOKIE } from "./auth";
+import {
+  isTokenExpired,
+  loginUrl,
+  readTokenClaims,
+  SESSION_COOKIE,
+} from "./auth";
 
 // The cookie outlives the 8 h token on purpose: when the token expires the cookie is still there,
 // so the login page can say "Tu sesión venció" instead of looking like the user never logged in.
@@ -45,6 +50,12 @@ async function requireToken(): Promise<string> {
   await io();
   if (!token || isTokenExpired(token)) redirect(loginUrl({ expired: !!token }));
   return token;
+}
+
+/** The user the session belongs to, from the token (shown only, never trusted for access). */
+export async function getSessionUsername(): Promise<string> {
+  const token = await requireToken();
+  return readTokenClaims(token)?.sub ?? "admin";
 }
 
 /** Like `attempt`, but a 401 (expired or revoked token) sends the user back to the login. */
