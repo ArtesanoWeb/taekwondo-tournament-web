@@ -72,6 +72,13 @@ async function AdminCategory({
   const status = tournament.data.status;
   const registered = registrations.data.length;
   const roster = sortByAthleteName(registrations.data);
+  // The bracket only has names: the club comes from the registrations.
+  const clubs = Object.fromEntries(
+    registrations.data.map((registration) => [
+      registration.athlete_id,
+      registration.athlete.club.name,
+    ]),
+  );
 
   // The whole roster is only needed while athletes can still be registered.
   const athletes = canWithdraw(status)
@@ -126,10 +133,11 @@ async function AdminCategory({
             status === "in_progress" ? (
               <ScoringBracket
                 bracket={bracket.data}
+                clubs={clubs}
                 roundsToWin={category.data.rounds_to_win}
               />
             ) : (
-              <BracketView bracket={bracket.data} />
+              <BracketView bracket={bracket.data} clubs={clubs} />
             )
           ) : status === "in_progress" && registered >= 2 ? (
             <GenerateBracket categoryId={categoryId} registered={registered} />

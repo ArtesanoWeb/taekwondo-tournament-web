@@ -8,10 +8,18 @@ import { groupRounds, matchesToScore } from "@/lib/bracket";
 
 import { MatchScoreForm } from "./match-score-form";
 
-type ScoringBracketProps = { bracket: Bracket; roundsToWin: number };
+type ScoringBracketProps = {
+  bracket: Bracket;
+  roundsToWin: number;
+  clubs: Record<number, string>;
+};
 
 /** The bracket as the main screen of a live category: tapping a ready match opens its scoring. */
-export function ScoringBracket({ bracket, roundsToWin }: ScoringBracketProps) {
+export function ScoringBracket({
+  bracket,
+  roundsToWin,
+  clubs,
+}: ScoringBracketProps) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const ready = matchesToScore(bracket.matches);
   // Derived from the fresh data, so the dialog closes by itself once the match has a winner.
@@ -31,6 +39,7 @@ export function ScoringBracket({ bracket, roundsToWin }: ScoringBracketProps) {
       )}
       <BracketView
         bracket={bracket}
+        clubs={clubs}
         selectableIds={new Set(ready.map((match) => match.id))}
         onSelectMatch={setSelectedId}
       />
