@@ -43,7 +43,7 @@ export function BracketView({
       <ol
         ref={scrollerRef}
         aria-label="Llave"
-        className="flex items-stretch gap-8 overflow-x-auto px-4 pb-4 sm:-mx-4"
+        className="flex items-stretch gap-8 overflow-x-auto px-4 sm:-mx-4 sm:pb-4"
       >
         {rounds.map((round, index) => (
           <li key={round.number} className="flex w-60 shrink-0 flex-col">
