@@ -63,7 +63,10 @@ export async function CategoryBracket({
                 {formatDateTime(bracket.data.generated_at)}
               </time>
             </p>
-            <BracketView bracket={bracket.data} />
+            <BracketView
+              bracket={bracket.data}
+              clubs={registrants.ok ? clubsById(registrants.data) : undefined}
+            />
           </section>
         ) : (
           <ErrorNotice message={bracket.error.message} />
@@ -111,5 +114,12 @@ function RegistrantList({ registrants }: { registrants: Registrant[] }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+/** The bracket only has names: the club comes from the public list of registrants. */
+function clubsById(registrants: Registrant[]): Record<number, string> {
+  return Object.fromEntries(
+    registrants.map((registrant) => [registrant.athlete_id, registrant.club]),
   );
 }

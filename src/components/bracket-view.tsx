@@ -17,8 +17,11 @@ export function BracketView({
   bracket,
   selectableIds,
   onSelectMatch,
+  clubs = {},
 }: {
   bracket: Bracket;
+  /** Each athlete's club by athlete id, shown under the names. The bracket only has names. */
+  clubs?: Record<number, string>;
   /** Matches that can be tapped, for the admin. Without them the bracket is read-only. */
   selectableIds?: Set<number>;
   onSelectMatch?: (matchId: number) => void;
@@ -37,42 +40,45 @@ export function BracketView({
   }, []);
 
   return (
-    // The line spans the screen on phones, like the title bar's; on larger screens it lines up
-    // with the content while the map itself still pans past the edges.
-    <div className="border-t border-zinc-200 pt-4 max-sm:-mx-4 dark:border-zinc-800">
-      <ol
-        ref={scrollerRef}
-        aria-label="Llave"
-        className="flex items-stretch gap-8 overflow-x-auto px-4 sm:-mx-4 sm:pb-4"
-      >
-        {rounds.map((round, index) => (
-          <li key={round.number} className="flex w-60 shrink-0 flex-col">
-            <h3 className="mb-1 text-sm font-semibold tracking-wide text-zinc-500 uppercase">
-              {round.name}
-            </h3>
-            {/* Every round has half the matches of the previous one, so each cell is twice as tall
-                and its two feeder matches are centered at 25% and 75% of its height. */}
-            <ul className="flex flex-1 flex-col">
-              {round.matches.map((match) => (
-                <li
-                  key={match.id}
-                  className="relative flex flex-1 items-center py-2"
-                >
-                  {index > 0 && <Connector />}
-                  <MatchCard
-                    match={match}
-                    onSelect={
-                      selectableIds?.has(match.id)
-                        ? () => onSelectMatch?.(match.id)
-                        : undefined
-                    }
-                  />
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ol>
+    <div className="flex flex-col gap-4">
+      {/* The line spans the screen on phones, like the title bar's; on larger screens it lines
+          up with the content while the map itself still pans past the edges. */}
+      <div className="border-t border-zinc-200 pt-4 max-sm:-mx-4 dark:border-zinc-800">
+        <ol
+          ref={scrollerRef}
+          aria-label="Llave"
+          className="flex items-stretch gap-8 overflow-x-auto px-4 sm:-mx-4 sm:pb-4"
+        >
+          {rounds.map((round, index) => (
+            <li key={round.number} className="flex w-60 shrink-0 flex-col">
+              <h3 className="mb-1 text-sm font-semibold tracking-wide text-zinc-500 uppercase">
+                {round.name}
+              </h3>
+              {/* Every round has half the matches of the previous one, so each cell is twice as tall
+                  and its two feeder matches are centered at 25% and 75% of its height. */}
+              <ul className="flex flex-1 flex-col">
+                {round.matches.map((match) => (
+                  <li
+                    key={match.id}
+                    className="relative flex flex-1 items-center py-2"
+                  >
+                    {index > 0 && <Connector />}
+                    <MatchCard
+                      match={match}
+                      clubs={clubs}
+                      onSelect={
+                        selectableIds?.has(match.id)
+                          ? () => onSelectMatch?.(match.id)
+                          : undefined
+                      }
+                    />
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }
@@ -94,9 +100,11 @@ function Connector() {
 
 function MatchCard({
   match,
+  clubs,
   onSelect,
 }: {
   match: Match;
+  clubs: Record<number, string>;
   onSelect?: () => void;
 }) {
   const won = roundsWon(match);
@@ -112,6 +120,7 @@ function MatchCard({
       name:
         (color === "red" ? match.athlete_red_name : match.athlete_blue_name) ??
         null,
+      club: athleteId !== null ? (clubs[athleteId] ?? null) : null,
       emptyLabel: emptySideLabel,
       isWinner: match.winner_id !== null && match.winner_id === athleteId,
       isLoser:
@@ -158,6 +167,7 @@ function MatchCard({
 type SideProps = {
   color: "red" | "blue";
   name: string | null;
+  club: string | null;
   emptyLabel: string;
   isWinner: boolean;
   isLoser: boolean;
@@ -167,6 +177,7 @@ type SideProps = {
 function Side({
   color,
   name,
+  club,
   emptyLabel,
   isWinner,
   isLoser,
@@ -182,8 +193,18 @@ function Side({
       />
       <span className="sr-only">{color === "red" ? "Rojo:" : "Azul:"}</span>
       {name ? (
-        <span className="min-w-0 flex-1 truncate" title={name}>
-          {name}
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate" title={name}>
+            {name}
+          </span>
+          {club && (
+            <span
+              className="truncate text-xs font-normal text-zinc-500"
+              title={club}
+            >
+              {club}
+            </span>
+          )}
         </span>
       ) : (
         <span className="flex-1 text-zinc-400 italic">{emptyLabel}</span>
