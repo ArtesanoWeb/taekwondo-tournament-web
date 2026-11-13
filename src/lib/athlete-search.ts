@@ -64,3 +64,13 @@ const collator = new Intl.Collator("es", { sensitivity: "base" });
 export function compareNames(a: string, b: string): number {
   return collator.compare(a, b);
 }
+
+export const ALPHABET = [..."ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"];
+
+/** The index letter of a name: Ñ stays Ñ, Á goes under A; anything else under "#". */
+export function letterOf(name: string): string {
+  const first = name.trim().charAt(0).toUpperCase();
+  if (first === "Ñ") return "Ñ";
+  const plain = first.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  return ALPHABET.includes(plain) ? plain : "#";
+}

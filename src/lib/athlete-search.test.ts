@@ -5,6 +5,7 @@ import type { Athlete } from "@/lib/api/types";
 import {
   compareNames,
   filterAthletes,
+  letterOf,
   matchesQuery,
   NO_FILTERS,
   normalize,
@@ -70,7 +71,13 @@ describe("suggestions", () => {
   });
 });
 
-describe("compareNames", () => {
+describe("letterOf and compareNames", () => {
+  it("indexes Ñ on its own and accented letters under the plain one", () => {
+    expect(letterOf("Ñandú")).toBe("Ñ");
+    expect(letterOf("Óscar")).toBe("O");
+    expect(letterOf("123")).toBe("#");
+  });
+
   it("sorts Ñ after N", () => {
     const sorted = ["Ñu", "Oso", "Nina"].toSorted(compareNames);
     expect(sorted).toEqual(["Nina", "Ñu", "Oso"]);

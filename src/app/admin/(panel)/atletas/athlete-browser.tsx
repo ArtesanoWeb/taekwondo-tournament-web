@@ -1,14 +1,23 @@
 "use client";
 
-import { type FormEvent, useId, useState } from "react";
+import {
+  type FormEvent,
+  type PointerEvent,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 
 import { secondaryButtonClass } from "@/components/button-classes";
 import { SearchShortcut } from "@/components/search-shortcut";
 import type { Athlete, Club, Gender } from "@/lib/api/types";
 import {
+  ALPHABET,
   type AthleteFilters,
   compareNames,
   filterAthletes,
+  letterOf,
   NO_FILTERS,
   suggestions,
 } from "@/lib/athlete-search";
@@ -29,7 +38,8 @@ const chipClass = (selected: boolean) =>
 
 /**
  * The athletes list, searched and filtered here with the whole list already loaded: suggestions
- * while typing (#92) and club and gender filters (#94).
+ * while typing (#92), club and gender filters (#94) and, on phones, an alphabet to jump by
+ * letter (#93).
  */
 export function AthleteBrowser({
   athletes,
@@ -140,7 +150,10 @@ export function AthleteBrowser({
             : "No hay atletas con esa búsqueda o filtros."}
         </p>
       ) : (
-        <AthleteList athletes={shown} clubs={clubs} />
+        <>
+          <AthleteList athletes={shown} clubs={clubs} />
+          <AlphabetIndex athletes={shown} />
+        </>
       )}
     </>
   );
@@ -240,11 +253,16 @@ function AthleteList({
 }) {
   return (
     <ul className="flex flex-col gap-3">
-      {athletes.map((athlete) => {
+      {athletes.map((athlete, index) => {
+        const letter = letterOf(athlete.name);
+        const firstOfLetter =
+          index === 0 || letterOf(athletes[index - 1].name) !== letter;
         return (
           <li
             key={athlete.id}
-            className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+            // The alphabet jumps to the first athlete of each letter.
+            id={firstOfLetter ? `letra-${letter}` : undefined}
+            className="flex scroll-mt-4 items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
           >
             <div className="flex min-w-0 flex-col gap-1">
               <h2 className="font-semibold">{athlete.name}</h2>
@@ -272,5 +290,107 @@ function AthleteList({
         );
       })}
     </ul>
+  );
+}
+
+/**
+ * Phones only: the alphabet on the right edge, shown while the list scrolls. Tap or drag over a
+ * letter to jump to its first athlete; letters with nobody are dimmed.
+ */
+function AlphabetIndex({ athletes }: { athletes: Athlete[] }) {
+  const present = new Set(athletes.map((athlete) => letterOf(athlete.name)));
+  const letters = present.has("#") ? [...ALPHABET, "#"] : ALPHABET;
+  const [visible, setVisible] = useState(false);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setVisible(true);
+      clearTimeout(hideTimer.current);
+      hideTimer.current = setTimeout(() => setVisible(false), 1500);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(hideTimer.current);
+    };
+  }, []);
+
+  const jumpTo = (letter: string) => {
+    if (!present.has(letter)) return;
+    document
+      .getElementById(`letra-${letter}`)
+      ?.scrollIntoView({ block: "start" });
+  };
+
+  const letterAt = (clientY: number) => {
+    const bar = barRef.current;
+    if (!bar) return null;
+    const { top, height } = bar.getBoundingClientRect();
+    const index = Math.floor(((clientY - top) / height) * letters.length);
+    return letters[Math.min(letters.length - 1, Math.max(0, index))];
+  };
+
+  const onPointer = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.type === "pointerdown") {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } else if (dragging === null) {
+      return;
+    }
+    const letter = letterAt(event.clientY);
+    if (letter && letter !== dragging) {
+      setDragging(letter);
+      jumpTo(letter);
+    }
+    clearTimeout(hideTimer.current);
+  };
+
+  const endDrag = () => {
+    setDragging(null);
+    hideTimer.current = setTimeout(() => setVisible(false), 1500);
+  };
+
+  const shown = visible || dragging !== null;
+
+  return (
+    <>
+      <div
+        ref={barRef}
+        role="navigation"
+        aria-label="Saltar a una letra"
+        onPointerDown={onPointer}
+        onPointerMove={onPointer}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        // Between the header area and the search shortcut above the "+".
+        className={`fixed top-24 right-0.5 bottom-[calc(13rem+env(safe-area-inset-bottom))] z-30 flex w-6 touch-none flex-col items-center justify-between rounded-full bg-white/80 py-1 text-[0.65rem] leading-none font-semibold shadow-sm transition-opacity select-none sm:hidden dark:bg-zinc-900/80 ${
+          shown ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        {letters.map((letter) => (
+          <span
+            key={letter}
+            aria-hidden
+            className={
+              present.has(letter)
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-zinc-300 dark:text-zinc-700"
+            }
+          >
+            {letter}
+          </span>
+        ))}
+      </div>
+      {dragging && (
+        <span
+          aria-hidden
+          className="fixed top-1/2 right-12 z-30 flex size-16 -translate-y-1/2 items-center justify-center rounded-2xl bg-zinc-900/85 text-3xl font-semibold text-white sm:hidden"
+        >
+          {dragging}
+        </span>
+      )}
+    </>
   );
 }
