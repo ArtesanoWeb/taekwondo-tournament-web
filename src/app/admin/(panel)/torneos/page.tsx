@@ -20,11 +20,12 @@ export default function AdminTournamentsPage({
 }: PageProps<"/admin/torneos">) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Torneos</h1>
+      {/* The navigation already says where we are; the heading stays for screen readers. */}
+      <h1 className="sr-only">Torneos</h1>
+      <div className="hidden justify-end sm:flex">
         <Link
           href="/admin/torneos/nuevo"
-          className="hidden rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 sm:block dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
           Nuevo torneo
         </Link>
