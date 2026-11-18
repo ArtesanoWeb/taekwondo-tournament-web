@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { FormError } from "@/components/form-error";
 
 import { type CreateTournamentState, createTournament } from "../actions";
@@ -74,13 +75,15 @@ export function TournamentForm() {
         >
           Cancelar
         </Link>
-        <button
-          type="submit"
+        <ConfirmSubmitButton
           disabled={isPending}
           className="rounded-md bg-zinc-900 px-4 py-2.5 font-medium text-white hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          title="¿Crear el torneo?"
+          confirmLabel="Sí, crear"
+          message="Se crea con las inscripciones abiertas y no aparece en el sitio público hasta que lo inicies."
         >
           {isPending ? "Creando…" : "Crear torneo"}
-        </button>
+        </ConfirmSubmitButton>
       </div>
     </form>
   );

@@ -7,6 +7,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/button-classes";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
 import { EMPTY_CATEGORY_VALUES } from "@/lib/category-form";
@@ -71,7 +72,9 @@ function CategoryDialog({
   return (
     <dialog
       ref={dialogRef}
-      onClose={() => {
+      // React bubbles `close` from the nested confirmation: only this dialog's own close counts.
+      onClose={(event) => {
+        if (event.target !== event.currentTarget) return;
         if (state.stale) router.refresh();
         onClose();
       }}
@@ -216,13 +219,15 @@ function CategoryDialog({
           >
             Cancelar
           </button>
-          <button
-            type="submit"
+          <ConfirmSubmitButton
             disabled={isPending}
             className={primaryButtonClass}
+            title="¿Crear la categoría?"
+            confirmLabel="Sí, crear"
+            message="Después podrás inscribir atletas en ella."
           >
             {isPending ? "Creando…" : "Crear categoría"}
-          </button>
+          </ConfirmSubmitButton>
         </div>
       </form>
     </dialog>

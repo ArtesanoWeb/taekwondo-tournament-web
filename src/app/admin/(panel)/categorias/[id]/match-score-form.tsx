@@ -78,10 +78,12 @@ export function MatchScoreForm({
       <input type="hidden" name="matchId" value={match.id} />
       <input type="hidden" name="roundNumber" value={nextRound} />
       <div className="flex items-baseline justify-between gap-3 text-sm">
-        <h3 className="font-semibold">
+        <h3 className="truncate font-semibold">
           {roundName} · Combate {match.slot + 1}
         </h3>
-        <span className="text-zinc-500">Al mejor de {roundsToWin * 2 - 1}</span>
+        <span className="shrink-0 whitespace-nowrap text-zinc-500">
+          Al mejor de {roundsToWin * 2 - 1}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -142,9 +144,9 @@ export function MatchScoreForm({
               <dd className="font-semibold tabular-nums">{preview.blue}</dd>
             </dl>
             <p>
-              Gana el round <strong>{winnerOfRound}</strong>. Quien llegue a{" "}
-              {roundsToWin} rounds ganados gana el combate y pasa a la siguiente
-              ronda.{" "}
+              Gana el round <strong>{winnerOfRound}</strong>.
+            </p>
+            <p>
               <strong className="text-zinc-950 dark:text-zinc-50">
                 El round no se puede editar después.
               </strong>

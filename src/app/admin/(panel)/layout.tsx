@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { logout } from "../actions";
+import { LogoutButton } from "@/components/logout-button";
+
 import { BottomNav } from "./bottom-nav";
 
 export const metadata: Metadata = {
@@ -27,7 +28,6 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
       <div className="hidden items-center justify-between gap-x-4 border-b border-zinc-200 pb-3 sm:flex dark:border-zinc-800">
         <nav aria-label="Administración">
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            <li className="font-semibold">Admin</li>
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
@@ -40,14 +40,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
             ))}
           </ul>
         </nav>
-        <form action={logout}>
-          <button
-            type="submit"
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-          >
-            Cerrar sesión
-          </button>
-        </form>
+        <LogoutButton className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900" />
       </div>
       {children}
       <BottomNav />
