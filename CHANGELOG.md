@@ -7,6 +7,49 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-13
+
+Torneo en vivo cómodo: el admin pensado primero para el celular, y el visitante ve quién compite,
+de qué club es y quién ganó.
+
+### Added
+
+- Sitio público: en una categoría sin llave se ven los inscritos, solo nombre y club (#54).
+- Llaves: el club de cada atleta debajo de su nombre (#96) y el campeón destacado cuando termina la
+  final (#14), en el sitio público y en el admin.
+- Administración en celular: barra inferior con Atletas, Clubes, **Torneos** al centro, Rankings y
+  Más (#89).
+- Administración: pantalla «Más» con un perfil de prototipo (#90) y «Acerca de» con las versiones
+  de la web y la API (#73).
+- Administración: prototipo de Rankings de clubes con datos de ejemplo (#91).
+- Administración: cerrar sesión desde el header en celular, con confirmación (#95).
+- Atletas: sugerencias al escribir en el buscador (#92), filtros por género y club (#94) y, en
+  celular, un abecedario para saltar por letra (#93); botón flotante «+» y una lupa para volver a la
+  búsqueda.
+- Clubes: botón flotante «+» en celular.
+
+### Changed
+
+- Celular: el detalle de torneo y de categoría (admin y sitio público) y el formulario de nuevo
+  torneo ocupan la pantalla: sin header, con la salida junto al título y una línea debajo.
+- La llave se ve siempre como mapa (sin el selector Columna/Mapa) y abre en la ronda que se está
+  jugando.
+- Administración: torneo con solo su título; listas sin título visible; sin el enlace «Ver en el
+  sitio público»; formulario de nuevo torneo sin barra inferior ni «Cancelar» en celular.
+- Header más grande en celular.
+
+### Fixed
+
+- Campos de fecha del mismo ancho que los demás en Android.
+- Las pestañas ya no quedan pegadas a medio deslizar.
+- Menos espacio vacío al final de las páginas en celular.
+
+### Known issues
+
+- Inscribir: todavía se ofrecen todos los atletas, no solo los que encajan en la categoría (#78);
+  espera el endpoint de la API 0.7.0.
+- Rankings y el perfil son prototipos: usan datos de ejemplo y el usuario de la sesión.
+
 ## [0.4.1] - 2026-11-13
 
 ### Fixed
@@ -141,7 +184,8 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.1...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.0...develop
+[0.5.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.2.0...v0.3.0
