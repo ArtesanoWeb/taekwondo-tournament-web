@@ -27,7 +27,6 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
       <div className="hidden items-center justify-between gap-x-4 border-b border-zinc-200 pb-3 sm:flex dark:border-zinc-800">
         <nav aria-label="Administración">
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            <li className="font-semibold">Admin</li>
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
