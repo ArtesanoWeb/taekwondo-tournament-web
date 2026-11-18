@@ -9,6 +9,7 @@ import {
   groupRounds,
   matchesToScore,
   pendingMatchCount,
+  podium,
   roundName,
   roundsWon,
   shortRoundName,
@@ -213,5 +214,67 @@ describe("champion", () => {
   it("is null while the final hasn't been fought", () => {
     expect(champion([...semis, match(3, 2, 0)])).toBeNull();
     expect(champion([])).toBeNull();
+  });
+});
+
+describe("podium", () => {
+  const people = {
+    ana: { id: 10, name: "Ana" },
+    bea: { id: 20, name: "Bea" },
+    caro: { id: 30, name: "Caro" },
+    dani: { id: 40, name: "Dani" },
+  };
+  const fight = (
+    id: number,
+    round: number,
+    slot: number,
+    red: { id: number; name: string },
+    blue: { id: number; name: string } | null,
+    winner: { id: number; name: string } | null,
+  ) =>
+    match(id, round, slot, {
+      athlete_red_id: red.id,
+      athlete_red_name: red.name,
+      athlete_blue_id: blue?.id ?? null,
+      athlete_blue_name: blue?.name ?? null,
+      status: winner ? (blue ? "finished" : "bye") : "pending",
+      winner_id: winner?.id ?? null,
+      winner_name: winner?.name ?? null,
+    });
+
+  it("gives silver to the final's loser and bronze to whoever lost to the champion", () => {
+    const { ana, bea, caro, dani } = people;
+    const matches = [
+      fight(1, 1, 0, ana, caro, ana),
+      fight(2, 1, 1, bea, dani, bea),
+      fight(3, 2, 0, ana, bea, bea),
+    ];
+    // Bea won the final against Ana and her semifinal against Dani.
+    expect(podium(matches)).toEqual({ gold: bea, silver: ana, bronze: dani });
+  });
+
+  it("has no bronze in a bracket of two, nor when the champion's semifinal was a bye", () => {
+    const { ana, bea, caro } = people;
+    expect(podium([fight(1, 1, 0, ana, bea, ana)])).toEqual({
+      gold: ana,
+      silver: bea,
+      bronze: null,
+    });
+    const matches = [
+      fight(1, 1, 0, ana, null, ana),
+      fight(2, 1, 1, bea, caro, bea),
+      fight(3, 2, 0, ana, bea, ana),
+    ];
+    expect(podium(matches)).toEqual({ gold: ana, silver: bea, bronze: null });
+  });
+
+  it("is null until the final is over", () => {
+    const { ana, bea, caro, dani } = people;
+    const matches = [
+      fight(1, 1, 0, ana, caro, ana),
+      fight(2, 1, 1, bea, dani, bea),
+      fight(3, 2, 0, ana, bea, null),
+    ];
+    expect(podium(matches)).toBeNull();
   });
 });
