@@ -10,7 +10,6 @@ import {
 } from "react";
 
 import { secondaryButtonClass } from "@/components/button-classes";
-import { SearchShortcut } from "@/components/search-shortcut";
 import type { Athlete, Club, Gender } from "@/lib/api/types";
 import {
   ALPHABET,
@@ -79,7 +78,6 @@ export function AthleteBrowser({
         appliedQuery={filters.query}
         onApply={applyQuery}
       />
-      <SearchShortcut inputId={SEARCH_ID} />
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
