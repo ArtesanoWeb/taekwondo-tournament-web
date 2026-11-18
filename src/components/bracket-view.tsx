@@ -10,8 +10,10 @@ import {
   roundsWon,
 } from "@/lib/bracket";
 import { matchStatusLabels } from "@/lib/labels";
+import { recall, remember } from "@/lib/scroll-memory";
 
 import { Medal } from "./medal";
+import { RestoreScrollScript } from "./restore-scroll-script";
 
 // Width of a column (`w-60`) plus the gap between columns (`gap-8`).
 const COLUMN_PX = 240 + 32;
@@ -38,10 +40,17 @@ export function BracketView({
   const scrollerRef = useRef<HTMLOListElement>(null);
   const places = podium(bracket.matches);
 
-  // Only on mount: afterwards the map is panned freely.
+  const memoryKey = `llave:${bracket.id}`;
+
+  // Only on mount: back where it was left in this browser tab or, the first time, on the current
+  // round (below `lg`). Afterwards the map is panned freely.
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
-    if (scroller && !window.matchMedia("(min-width: 64rem)").matches) {
+    if (!scroller) return;
+    const stored = recall(memoryKey);
+    if (stored !== null) {
+      scroller.scrollLeft = stored;
+    } else if (!window.matchMedia("(min-width: 64rem)").matches) {
       scroller.scrollLeft = initialRound * COLUMN_PX;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -55,6 +64,9 @@ export function BracketView({
       <div className="border-t border-zinc-200 pt-4 max-sm:-mx-4 dark:border-zinc-800">
         <ol
           ref={scrollerRef}
+          onScroll={(event) =>
+            remember(memoryKey, event.currentTarget.scrollLeft)
+          }
           aria-label="Llave"
           className="flex items-stretch gap-8 overflow-x-auto px-4 sm:-mx-4 sm:pb-4"
         >
@@ -87,6 +99,7 @@ export function BracketView({
             </li>
           ))}
         </ol>
+        <RestoreScrollScript storageKey={memoryKey} mode="offset" />
       </div>
     </div>
   );
