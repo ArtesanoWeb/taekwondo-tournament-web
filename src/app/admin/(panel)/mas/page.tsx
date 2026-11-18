@@ -41,7 +41,7 @@ export default function MorePage() {
       <ul className={groupClass}>
         <li>
           <Link href="/" className={rowClass}>
-            Ver sitio
+            Ver como visitante
             {chevron}
           </Link>
         </li>

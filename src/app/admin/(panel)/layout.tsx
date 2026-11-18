@@ -15,7 +15,7 @@ const navLinks = [
   { href: "/admin/atletas", label: "Atletas" },
   { href: "/admin/clubes", label: "Clubes" },
   { href: "/admin/rankings", label: "Rankings" },
-  { href: "/", label: "Ver sitio" },
+  { href: "/", label: "Ver como visitante" },
 ];
 
 // No session check here: layouts don't re-render on navigation. Each page checks it through

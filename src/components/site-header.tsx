@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { headerClass, headerRowClass } from "./header-classes";
+import {
+  headerActionsClass,
+  headerClass,
+  headerRowClass,
+  themeToggleClass,
+} from "./header-classes";
 import { HeaderFrame } from "./header-frame";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteHeader() {
   // Mobile first: larger on phones, the usual size from `sm` up.
@@ -24,7 +30,12 @@ export function SiteHeader() {
     <Suspense
       fallback={
         <header className={headerClass}>
-          <div className={headerRowClass}>{brand}</div>
+          <div className={headerRowClass}>
+            {brand}
+            <div className={headerActionsClass}>
+              <ThemeToggle className={themeToggleClass} />
+            </div>
+          </div>
         </header>
       }
     >
