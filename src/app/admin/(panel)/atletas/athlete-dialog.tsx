@@ -12,6 +12,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/button-classes";
+import { Belt } from "@/components/belt";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
@@ -171,24 +172,29 @@ function AthleteDialog({ athlete, clubs, onClose }: AthleteDialogProps) {
               ))}
             </select>
           </label>
-          <label className={labelClass}>
-            Grado
-            <select
-              name="grade"
-              required
-              defaultValue={values.grade}
-              className={inputClass}
-            >
-              <option value="" disabled>
-                Elegir…
-              </option>
+          {/* Each grade is its belt: tap one to choose it (its name is the accessible label). */}
+          <fieldset className="flex flex-col gap-1.5 text-sm font-medium">
+            <legend className="mb-1.5">Grado</legend>
+            <div className="grid grid-cols-4 gap-2">
               {(Object.keys(gradeLabels) as Grade[]).map((grade) => (
-                <option key={grade} value={grade}>
-                  {gradeLabels[grade]}
-                </option>
+                <label
+                  key={grade}
+                  title={gradeLabels[grade]}
+                  className="flex cursor-pointer items-center justify-center rounded-md border border-zinc-300 px-1 py-2.5 has-checked:border-blue-600 has-checked:bg-blue-50 has-checked:ring-2 has-checked:ring-blue-600/30 has-focus-visible:ring-2 has-focus-visible:ring-zinc-900/30 dark:border-zinc-700 dark:has-checked:border-blue-400 dark:has-checked:bg-blue-950/40 dark:has-checked:ring-blue-400/30"
+                >
+                  <input
+                    type="radio"
+                    name="grade"
+                    value={grade}
+                    required
+                    defaultChecked={values.grade === grade}
+                    className="sr-only"
+                  />
+                  <Belt grade={grade} className="h-6 w-14" />
+                </label>
               ))}
-            </select>
-          </label>
+            </div>
+          </fieldset>
           <label className={labelClass}>
             Peso (kg)
             <DigitsInput
