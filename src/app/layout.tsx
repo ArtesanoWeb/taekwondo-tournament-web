@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { themeScript } from "@/lib/theme";
 
 import "./globals.css";
 
@@ -31,7 +32,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // The theme script adds `dark` before React hydrates.
+      suppressHydrationWarning
     >
+      <head>
+        {/* Inline and blocking on purpose: it runs before the first paint, so there is no flash. */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="flex min-h-full flex-col font-sans">
         <SiteHeader />
         <main className="mx-auto w-full max-w-5xl flex-1 px-4">{children}</main>

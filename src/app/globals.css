@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Dark mode follows the `dark` class on <html>, set before painting by the script in the root
+   layout: the visitor's choice (theme toggle) or, until they choose, the system's. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -30,11 +34,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  /* Native controls (date pickers, scrollbars) in dark too. */
+  color-scheme: dark;
 }
 
 body {
