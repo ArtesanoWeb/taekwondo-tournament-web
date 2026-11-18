@@ -16,7 +16,7 @@ const valid: AthleteFormValues = {
   ci: " 1234567-1a ",
   birthDate: "2012-03-14",
   gender: "male",
-  beltRank: " verde ",
+  grade: " kup_6 ",
   weight: "38,5",
   clubId: "2",
 };
@@ -33,7 +33,7 @@ describe("parseAthleteForm", () => {
         ci: "1234567-1A",
         birth_date: "2012-03-14",
         gender: "male",
-        belt_rank: "verde",
+        grade: "kup_6",
         weight_kg: 38.5,
         club_id: 2,
       },
@@ -86,6 +86,16 @@ describe("parseAthleteForm", () => {
     expect(parse({ gender: "x" })).toMatchObject({ ok: false });
     expect(parse({ clubId: "abc" })).toMatchObject({ ok: false });
   });
+
+  it.each(["verde", "kup_11", "toString"])(
+    "rejects the grade %s, which the API does not have",
+    (grade) => {
+      expect(parse({ grade })).toEqual({
+        ok: false,
+        error: "El grado no es válido.",
+      });
+    },
+  );
 });
 
 describe("athleteToFormValues", () => {
@@ -95,7 +105,7 @@ describe("athleteToFormValues", () => {
       ci: null,
       birth_date: "2012-01-01",
       gender: "female",
-      belt_rank: "azul",
+      grade: "kup_4",
       weight_kg: 40.5,
       club_id: 3,
     } as Athlete;
@@ -104,7 +114,7 @@ describe("athleteToFormValues", () => {
       ci: "",
       birthDate: "2012-01-01",
       gender: "female",
-      beltRank: "azul",
+      grade: "kup_4",
       weight: "40.5",
       clubId: "3",
     });

@@ -7,6 +7,14 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-17
+
+### Fixed
+
+- Administración: crear y editar atletas volvió a funcionar con la API 0.7.0, que reemplazó el
+  cinturón en texto libre por un **grado** fijo. El formulario ahora pide el grado con un selector
+  (10.º Kup … 1.er Kup y Dan), y la lista de atletas lo muestra.
+
 ## [0.5.0] - 2026-11-13
 
 Torneo en vivo cómodo: el admin pensado primero para el celular, y el visitante ve quién compite,
@@ -184,7 +192,8 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.0...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.1...develop
+[0.5.1]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.3.0...v0.4.0

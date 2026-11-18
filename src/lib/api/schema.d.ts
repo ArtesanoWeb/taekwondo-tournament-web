@@ -217,7 +217,7 @@ export interface paths {
         };
         /**
          * Listar categorías
-         * @description Devuelve las categorías. Con el parámetro `tournament_id` devuelve solo las de ese torneo. Es público.
+         * @description Devuelve las categorías en el orden en que se crearon. Con el parámetro `tournament_id` devuelve solo las de ese torneo. Es público.
          */
         get: operations["list_categories"];
         put?: never;
@@ -281,7 +281,7 @@ export interface paths {
         };
         /**
          * Listar inscripciones
-         * @description Devuelve las inscripciones con los datos del atleta y de la categoría. Con `category_id` devuelve solo las de esa categoría y con `tournament_id` solo las de ese torneo; si se envían ambos, se aplican los dos filtros. Incluye fecha de nacimiento y peso de los atletas, por eso requiere token.
+         * @description Devuelve las inscripciones con los datos del atleta y de la categoría, en el orden en que se hicieron. Con `category_id` devuelve solo las de esa categoría y con `tournament_id` solo las de ese torneo; si se envían ambos, se aplican los dos filtros. Incluye fecha de nacimiento y peso de los atletas, por eso requiere token.
          */
         get: operations["list_registrations"];
         put?: never;
@@ -429,12 +429,10 @@ export interface components {
             /** @description Género del atleta. Debe coincidir con el de la categoría en que se inscribe. */
             gender: components["schemas"]["Gender"];
             /**
-             * Belt Rank
-             * @description Cinturón o grado, en texto libre.
-             * @example verde
-             * @example negro 1er dan
+             * @description Grado del atleta.
+             * @example kup_6
              */
-            belt_rank: string;
+            grade: components["schemas"]["Grade"];
             /**
              * Weight Kg
              * @description Peso en kilogramos.
@@ -472,12 +470,10 @@ export interface components {
             /** @description Género del atleta. Debe coincidir con el de la categoría en que se inscribe. */
             gender: components["schemas"]["Gender"];
             /**
-             * Belt Rank
-             * @description Cinturón o grado, en texto libre.
-             * @example verde
-             * @example negro 1er dan
+             * @description Grado del atleta.
+             * @example kup_6
              */
-            belt_rank: string;
+            grade: components["schemas"]["Grade"];
             /**
              * Weight Kg
              * @description Peso en kilogramos.
@@ -516,11 +512,8 @@ export interface components {
             birth_date?: string | null;
             /** @description Nuevo género. Si no se envía, no cambia. Ver las reglas con inscripciones en la operación. */
             gender?: components["schemas"]["Gender"] | null;
-            /**
-             * Belt Rank
-             * @description Nuevo cinturón o grado. Si no se envía, no cambia.
-             */
-            belt_rank?: string | null;
+            /** @description Nuevo grado. Si no se envía, no cambia. */
+            grade?: components["schemas"]["Grade"] | null;
             /**
              * Weight Kg
              * @description Nuevo peso en kilogramos. Si no se envía, no cambia. Ver las reglas con inscripciones en la operación.
@@ -759,6 +752,13 @@ export interface components {
          * @enum {string}
          */
         Gender: "male" | "female";
+        /**
+         * Grade
+         * @description Grado del atleta, de menor a mayor: `kup_10` (10mo Kup, cinturón blanco) … `kup_1` (1er Kup, negro-rojo) y
+         *     `dan` (cinturón negro).
+         * @enum {string}
+         */
+        Grade: "kup_10" | "kup_9" | "kup_8" | "kup_7" | "kup_6" | "kup_5" | "kup_4" | "kup_3" | "kup_2" | "kup_1" | "dan";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */

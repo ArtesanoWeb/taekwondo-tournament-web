@@ -14,9 +14,9 @@ import {
 } from "@/components/button-classes";
 import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
-import type { Athlete, Club } from "@/lib/api/types";
+import type { Athlete, Club, Grade } from "@/lib/api/types";
 import { athleteToFormValues, EMPTY_ATHLETE_VALUES } from "@/lib/athlete-form";
-import { genderLabels } from "@/lib/labels";
+import { genderLabels, gradeLabels } from "@/lib/labels";
 
 import { type AthleteState, saveAthlete } from "./actions";
 
@@ -27,15 +27,6 @@ const inputClass =
 // look and stretch like the other fields; the min height keeps an empty one from collapsing.
 const dateInputClass = `${inputClass} min-h-[2.625rem] w-full appearance-none text-left [&::-webkit-date-and-time-value]:text-left`;
 const labelClass = "flex flex-col gap-1 text-sm font-medium";
-
-const BELT_SUGGESTIONS = [
-  "blanco",
-  "amarillo",
-  "verde",
-  "azul",
-  "rojo",
-  "negro 1er dan",
-];
 
 type AthleteDialogButtonProps = {
   /** Without an athlete, the dialog creates a new one. */
@@ -177,20 +168,22 @@ function AthleteDialog({ athlete, clubs, onClose }: AthleteDialogProps) {
             </select>
           </label>
           <label className={labelClass}>
-            Cinturón
-            <input
-              name="beltRank"
+            Grado
+            <select
+              name="grade"
               required
-              list="belt-suggestions"
-              autoComplete="off"
-              defaultValue={values.beltRank}
+              defaultValue={values.grade}
               className={inputClass}
-            />
-            <datalist id="belt-suggestions">
-              {BELT_SUGGESTIONS.map((belt) => (
-                <option key={belt} value={belt} />
+            >
+              <option value="" disabled>
+                Elegir…
+              </option>
+              {(Object.keys(gradeLabels) as Grade[]).map((grade) => (
+                <option key={grade} value={grade}>
+                  {gradeLabels[grade]}
+                </option>
               ))}
-            </datalist>
+            </select>
           </label>
           <label className={labelClass}>
             Peso (kg)

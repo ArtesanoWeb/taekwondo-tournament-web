@@ -29,7 +29,7 @@ export async function saveAthlete(
     ci: field("ci"),
     birthDate: field("birthDate"),
     gender: field("gender"),
-    beltRank: field("beltRank"),
+    grade: field("grade"),
     weight: field("weight"),
     clubId: field("clubId"),
   };

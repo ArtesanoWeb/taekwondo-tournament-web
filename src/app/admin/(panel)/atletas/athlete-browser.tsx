@@ -22,7 +22,7 @@ import {
   suggestions,
 } from "@/lib/athlete-search";
 import { formatDate } from "@/lib/format";
-import { genderLabels } from "@/lib/labels";
+import { genderLabels, gradeLabels } from "@/lib/labels";
 
 import { AthleteDialogButton } from "./athlete-dialog";
 
@@ -275,8 +275,9 @@ function AthleteList({
                 {genderLabels[athlete.gender]}
                 {" · "}
                 {formatDate(athlete.birth_date)}
-                {" · "}
-                {athlete.belt_rank}
+              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {gradeLabels[athlete.grade]}
                 {" · "}
                 {athlete.weight_kg} kg
               </p>

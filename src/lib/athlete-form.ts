@@ -1,7 +1,8 @@
 // Validation of the athlete form, done before calling the API so the admin gets the errors in
 // Spanish (the API's 422 messages are in English) and keeps what they typed.
 
-import type { Athlete, Gender } from "@/lib/api/types";
+import type { Athlete, Gender, Grade } from "@/lib/api/types";
+import { gradeLabels } from "@/lib/labels";
 import { isIsoDate } from "@/lib/tournament-form";
 
 export const MAX_WEIGHT_KG = 250;
@@ -14,7 +15,7 @@ export type AthleteFormValues = {
   ci: string;
   birthDate: string;
   gender: string;
-  beltRank: string;
+  grade: string;
   weight: string;
   clubId: string;
 };
@@ -24,7 +25,7 @@ export type AthletePayload = {
   ci: string | null;
   birth_date: string;
   gender: Gender;
-  belt_rank: string;
+  grade: Grade;
   weight_kg: number;
   club_id: number;
 };
@@ -37,7 +38,7 @@ export const EMPTY_ATHLETE_VALUES: AthleteFormValues = {
   ci: "",
   birthDate: "",
   gender: "",
-  beltRank: "",
+  grade: "",
   weight: "",
   clubId: "",
 };
@@ -48,7 +49,7 @@ export function athleteToFormValues(athlete: Athlete): AthleteFormValues {
     ci: athlete.ci ?? "",
     birthDate: athlete.birth_date,
     gender: athlete.gender,
-    beltRank: athlete.belt_rank,
+    grade: athlete.grade,
     weight: String(athlete.weight_kg),
     clubId: String(athlete.club_id),
   };
@@ -56,6 +57,10 @@ export function athleteToFormValues(athlete: Athlete): AthleteFormValues {
 
 function isGender(value: string): value is Gender {
   return value === "male" || value === "female";
+}
+
+function isGrade(value: string): value is Grade {
+  return Object.hasOwn(gradeLabels, value);
 }
 
 /** `today` is `YYYY-MM-DD`; it's a parameter so the function stays pure and testable. */
@@ -67,7 +72,7 @@ export function parseAthleteForm(
   const ci = values.ci.trim().toUpperCase();
   const birthDate = values.birthDate.trim();
   const gender = values.gender.trim();
-  const beltRank = values.beltRank.trim();
+  const grade = values.grade.trim();
   // Spanish keyboards type the decimal separator as a comma.
   const weightText = values.weight.trim().replace(",", ".");
   const clubId = values.clubId.trim();
@@ -76,7 +81,7 @@ export function parseAthleteForm(
     !name && "el nombre",
     !birthDate && "la fecha de nacimiento",
     !gender && "el género",
-    !beltRank && "el cinturón",
+    !grade && "el grado",
     !weightText && "el peso",
     !clubId && "el club",
   ].filter((field): field is string => !!field);
@@ -101,6 +106,9 @@ export function parseAthleteForm(
   if (!isGender(gender)) {
     return { ok: false, error: "El género no es válido." };
   }
+  if (!isGrade(grade)) {
+    return { ok: false, error: "El grado no es válido." };
+  }
   const weight = /^\d+(\.\d+)?$/.test(weightText) ? Number(weightText) : NaN;
   if (!(weight > 0 && weight <= MAX_WEIGHT_KG)) {
     return {
@@ -119,7 +127,7 @@ export function parseAthleteForm(
       ci: ci || null,
       birth_date: birthDate,
       gender,
-      belt_rank: beltRank,
+      grade,
       weight_kg: weight,
       club_id: Number(clubId),
     },
