@@ -7,6 +7,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/button-classes";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FormError } from "@/components/form-error";
 import { type AthleteOption, filterAthleteOptions } from "@/lib/registrations";
 
@@ -52,8 +53,11 @@ function RegisterDialog({
   onClose,
 }: RegisterAthleteButtonProps & { onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const confirmRef = useRef<HTMLDialogElement>(null);
   const router = useRouter();
   const [query, setQuery] = useState("");
+  // The athlete whose «Inscribir» was tapped, waiting for the confirmation.
+  const [chosen, setChosen] = useState<AthleteOption>();
   // Remembered here: once registered, an athlete leaves `options` and its name would be lost.
   const [names] = useState(
     () => new Map(options.map((option) => [option.id, option.name])),
@@ -75,7 +79,9 @@ function RegisterDialog({
   return (
     <dialog
       ref={dialogRef}
-      onClose={() => {
+      // React bubbles `close` from the nested confirmation: only this dialog's own close counts.
+      onClose={(event) => {
+        if (event.target !== event.currentTarget) return;
         if (state.stale) router.refresh();
         onClose();
       }}
@@ -112,6 +118,7 @@ function RegisterDialog({
 
         <form action={formAction} className="min-h-0 flex-1 overflow-y-auto">
           <input type="hidden" name="categoryId" value={categoryId} />
+          <input type="hidden" name="athleteId" value={chosen?.id ?? ""} />
           {shown.length === 0 ? (
             <p className="p-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
               {options.length === 0
@@ -134,9 +141,11 @@ function RegisterDialog({
                     </span>
                   </div>
                   <button
-                    type="submit"
-                    name="athleteId"
-                    value={option.id}
+                    type="button"
+                    onClick={() => {
+                      setChosen(option);
+                      confirmRef.current?.showModal();
+                    }}
                     disabled={isPending}
                     className={`${primaryButtonClass} shrink-0`}
                   >
@@ -151,6 +160,13 @@ function RegisterDialog({
               Mostrando {MAX_RESULTS} de {matches.length}. Escribe para acotar.
             </p>
           )}
+          <ConfirmDialog
+            dialogRef={confirmRef}
+            title={`¿Inscribir a ${chosen?.name ?? ""}?`}
+            confirmLabel="Sí, inscribir"
+          >
+            {chosen && `${chosen.club} · ${chosen.weightKg} kg`}
+          </ConfirmDialog>
         </form>
 
         <button type="button" onClick={close} className={secondaryButtonClass}>

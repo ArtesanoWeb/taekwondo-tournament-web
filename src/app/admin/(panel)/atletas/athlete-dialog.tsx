@@ -12,6 +12,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/button-classes";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
 import type { Athlete, Club, Grade } from "@/lib/api/types";
@@ -102,7 +103,10 @@ function AthleteDialog({ athlete, clubs, onClose }: AthleteDialogProps) {
   return (
     <dialog
       ref={dialogRef}
-      onClose={onClose}
+      // React bubbles `close` from the nested confirmation: only this dialog's own close counts.
+      onClose={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
       aria-label={title}
       className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-lg bg-white p-5 text-zinc-950 shadow-xl backdrop:bg-black/50 dark:bg-zinc-900 dark:text-zinc-50"
     >
@@ -223,13 +227,19 @@ function AthleteDialog({ athlete, clubs, onClose }: AthleteDialogProps) {
             >
               Cancelar
             </button>
-            <button
-              type="submit"
+            <ConfirmSubmitButton
               disabled={isPending}
               className={primaryButtonClass}
+              title={athlete ? "¿Guardar los cambios?" : "¿Crear el atleta?"}
+              confirmLabel={athlete ? "Sí, guardar" : "Sí, crear"}
+              message={
+                athlete
+                  ? `Se actualizan los datos de ${athlete.name}.`
+                  : "Después podrás inscribirlo en las categorías de un torneo."
+              }
             >
               {isPending ? "Guardando…" : "Guardar"}
-            </button>
+            </ConfirmSubmitButton>
           </div>
         </div>
 

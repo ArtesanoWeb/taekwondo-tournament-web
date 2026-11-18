@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { logout } from "../actions";
+import { LogoutButton } from "@/components/logout-button";
+
 import { BottomNav } from "./bottom-nav";
 
 export const metadata: Metadata = {
@@ -39,14 +40,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
             ))}
           </ul>
         </nav>
-        <form action={logout}>
-          <button
-            type="submit"
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-          >
-            Cerrar sesión
-          </button>
-        </form>
+        <LogoutButton className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900" />
       </div>
       {children}
       <BottomNav />
