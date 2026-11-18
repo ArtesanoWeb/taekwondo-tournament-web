@@ -9,20 +9,21 @@ import {
   useState,
 } from "react";
 
+import { Belt } from "@/components/belt";
 import { secondaryButtonClass } from "@/components/button-classes";
-import { SearchShortcut } from "@/components/search-shortcut";
 import type { Athlete, Club, Gender } from "@/lib/api/types";
 import {
   ALPHABET,
   type AthleteFilters,
   compareNames,
   filterAthletes,
+  highlightParts,
   letterOf,
   NO_FILTERS,
   suggestions,
 } from "@/lib/athlete-search";
 import { formatDate } from "@/lib/format";
-import { genderLabels, gradeLabels } from "@/lib/labels";
+import { genderLabels } from "@/lib/labels";
 
 import { AthleteDialogButton } from "./athlete-dialog";
 
@@ -78,7 +79,6 @@ export function AthleteBrowser({
         appliedQuery={filters.query}
         onApply={applyQuery}
       />
-      <SearchShortcut inputId={SEARCH_ID} />
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -230,7 +230,17 @@ function SearchBox({
                 onClick={() => pick(athlete)}
                 className="flex w-full flex-col items-start px-4 py-2.5 text-left active:bg-zinc-100 dark:active:bg-zinc-800"
               >
-                <span className="font-medium">{athlete.name}</span>
+                <span className="font-normal">
+                  {highlightParts(athlete.name, text).map((part, index) =>
+                    part.match ? (
+                      <strong key={index} className="font-bold">
+                        {part.text}
+                      </strong>
+                    ) : (
+                      part.text
+                    ),
+                  )}
+                </span>
                 <span className="text-xs text-zinc-500">
                   {athlete.club.name}
                   {athlete.ci && ` · CI ${athlete.ci}`}
@@ -276,9 +286,8 @@ function AthleteList({
                 {" · "}
                 {formatDate(athlete.birth_date)}
               </p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                {gradeLabels[athlete.grade]}
-                {" · "}
+              <p className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                <Belt grade={athlete.grade} />
                 {athlete.weight_kg} kg
               </p>
             </div>
