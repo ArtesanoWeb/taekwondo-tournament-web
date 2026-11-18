@@ -17,4 +17,5 @@ export type TournamentStatus = Schemas["TournamentStatus"];
 export type MatchStatus = Schemas["MatchStatus"];
 export type Gender = Schemas["Gender"];
 export type BeltGroup = Schemas["BeltGroup"];
+export type Grade = Schemas["Grade"];
 export type Discipline = Schemas["Discipline"];

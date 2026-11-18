@@ -19,7 +19,7 @@ const athlete = (id: number, name: string, overrides: Partial<Athlete> = {}) =>
     ci: null,
     birth_date: "2012-01-01",
     gender: "male",
-    belt_rank: "azul",
+    grade: "kup_4",
     weight_kg: 40,
     club_id: 1,
     club: { id: 1, name: "Dojang Central" },
