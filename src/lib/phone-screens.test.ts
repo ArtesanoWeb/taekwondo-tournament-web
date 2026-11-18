@@ -18,9 +18,15 @@ describe("phone screens", () => {
     expect(hidesHeaderOnPhone("/admin/torneos/4/algo")).toBe(false);
   });
 
-  it("hides the bottom bar only on full-screen forms", () => {
+  it("hides the bottom bar inside a tournament and on full-screen forms", () => {
     expect(hidesBottomNavOnPhone("/admin/torneos/nuevo")).toBe(true);
-    expect(hidesBottomNavOnPhone("/admin/torneos/4")).toBe(false);
-    expect(hidesBottomNavOnPhone("/admin/categorias/10")).toBe(false);
+    expect(hidesBottomNavOnPhone("/admin/torneos/4")).toBe(true);
+    expect(hidesBottomNavOnPhone("/admin/categorias/10")).toBe(true);
+  });
+
+  it("keeps the bottom bar on the sections", () => {
+    expect(hidesBottomNavOnPhone("/admin/torneos")).toBe(false);
+    expect(hidesBottomNavOnPhone("/admin/atletas")).toBe(false);
+    expect(hidesBottomNavOnPhone("/admin/mas")).toBe(false);
   });
 });

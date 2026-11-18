@@ -22,9 +22,10 @@ const navLinks = [
 // `getAdminApi()`, and `proxy.ts` already redirects requests without one.
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
-    // Below `sm`: room for the bottom bar (4rem), the raised Torneos button and some air.
-    // Pages with a floating button add room for it (the tournament tabs do).
-    <div className="flex flex-col gap-6 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-6">
+    // Below `sm`: room for the bottom bar (4rem), the raised Torneos button and some air, only
+    // while the bar is there (screens inside a tournament hide it). Pages with a floating button
+    // add room for it (the tournament tabs do).
+    <div className="flex flex-col gap-6 pt-6 pb-6 max-sm:has-[>nav]:pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <div className="hidden items-center justify-between gap-x-4 border-b border-zinc-200 pb-3 sm:flex dark:border-zinc-800">
         <nav aria-label="Administración">
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
