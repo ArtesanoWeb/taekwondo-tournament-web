@@ -77,7 +77,7 @@ export function PublicTournamentTabs({
             className="w-full shrink-0 snap-start pb-1"
           >
             <h2 className="mb-3 hidden text-xl font-semibold lg:block">
-              {group.label} ({group.count})
+              {group.label}
             </h2>
             {group.count > 0 ? (
               <ul className="flex flex-col gap-3">{group.cards}</ul>

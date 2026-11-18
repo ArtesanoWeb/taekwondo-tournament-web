@@ -35,13 +35,13 @@ export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
             type="button"
             aria-pressed={index === active}
             onClick={() => goTo(index)}
-            className={`-mb-px border-b-2 px-1 py-3 text-sm ${
+            className={`-mb-px border-b-2 px-1 py-3 text-sm whitespace-nowrap ${
               index === active
                 ? "border-blue-600 font-semibold text-blue-600 dark:border-blue-400 dark:text-blue-400"
                 : "border-transparent text-zinc-600 dark:text-zinc-400"
             }`}
           >
-            {group.tabLabel} ({group.count})
+            {group.tabLabel}
           </button>
         ))}
       </div>
@@ -61,7 +61,7 @@ export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
             className="w-full shrink-0 snap-start pb-20 sm:pb-1 lg:pb-0"
           >
             <h2 className="mb-3 hidden text-lg font-semibold lg:block">
-              {group.label} ({group.count})
+              {group.label}
             </h2>
             {group.count > 0 ? (
               <ul className="flex flex-col gap-3">{group.cards}</ul>
