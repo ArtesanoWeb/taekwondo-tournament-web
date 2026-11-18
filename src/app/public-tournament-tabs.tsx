@@ -3,7 +3,11 @@
 import { type ReactNode, useRef } from "react";
 
 import { useScreenSwipe } from "@/components/use-screen-swipe";
+import { RestoreScrollScript } from "@/components/restore-scroll-script";
 import { useSwipeTabs } from "@/components/use-swipe-tabs";
+
+/** Where the active tab is remembered (`scroll-memory`). */
+const TABS_KEY = "pestañas:inicio";
 
 const iconProps = {
   "aria-hidden": true,
@@ -59,8 +63,10 @@ export function PublicTournamentTabs({
   groups: PublicGroup[];
   initialIndex: number;
 }) {
-  const { active, scrollerRef, panelRef, goTo, onScroll } =
-    useSwipeTabs(initialIndex);
+  const { active, scrollerRef, panelRef, goTo, onScroll } = useSwipeTabs(
+    initialIndex,
+    { key: TABS_KEY, count: groups.length },
+  );
   // Over the list the native scroll-snap swipes; this makes the rest of the screen do the same:
   // the panels follow the finger, and settle on the next one or back when it lifts.
   const dragFrom = useRef<{ index: number; left: number } | null>(null);
@@ -121,6 +127,7 @@ export function PublicTournamentTabs({
           </section>
         ))}
       </div>
+      <RestoreScrollScript storageKey={TABS_KEY} mode="tab" />
 
       <nav
         aria-label="Estado de los torneos"

@@ -2,7 +2,11 @@
 
 import type { ReactNode } from "react";
 
+import { RestoreScrollScript } from "@/components/restore-scroll-script";
 import { useSwipeTabs } from "@/components/use-swipe-tabs";
+
+/** Where the active tab is remembered (`scroll-memory`). */
+const TABS_KEY = "pestañas:admin-torneos";
 
 type TournamentGroup = {
   key: string;
@@ -24,8 +28,10 @@ type TournamentTabsProps = {
  * by side in columns.
  */
 export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
-  const { active, scrollerRef, panelRef, goTo, onScroll } =
-    useSwipeTabs(initialIndex);
+  const { active, scrollerRef, panelRef, goTo, onScroll } = useSwipeTabs(
+    initialIndex,
+    { key: TABS_KEY, count: groups.length },
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -74,6 +80,7 @@ export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
           </section>
         ))}
       </div>
+      <RestoreScrollScript storageKey={TABS_KEY} mode="tab" />
     </div>
   );
 }
