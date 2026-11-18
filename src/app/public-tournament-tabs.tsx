@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 
+import { useScreenSwipe } from "@/components/use-screen-swipe";
 import { useSwipeTabs } from "@/components/use-swipe-tabs";
 
 const iconProps = {
@@ -47,7 +48,8 @@ type PublicGroup = {
 };
 
 /**
- * Below `lg`: one group at a time, swiping or tapping the bottom bar, within thumb reach.
+ * Below `lg`: one group at a time, swiping anywhere on the screen or tapping the bottom bar,
+ * within thumb reach.
  * From `lg` up: the three groups side by side in columns.
  */
 export function PublicTournamentTabs({
@@ -59,6 +61,36 @@ export function PublicTournamentTabs({
 }) {
   const { active, scrollerRef, panelRef, goTo, onScroll } =
     useSwipeTabs(initialIndex);
+  // Over the list the native scroll-snap swipes; this makes the rest of the screen do the same:
+  // the panels follow the finger, and settle on the next one or back when it lifts.
+  const dragFrom = useRef<{ index: number; left: number } | null>(null);
+  useScreenSwipe(
+    {
+      onDrag: (dx) => {
+        const scroller = scrollerRef.current;
+        if (!scroller) return;
+        if (!dragFrom.current) {
+          dragFrom.current = { index: active, left: scroller.scrollLeft };
+          // Snapping would fight the finger while it drags.
+          scroller.style.scrollSnapType = "none";
+        }
+        scroller.scrollLeft = dragFrom.current.left - dx;
+      },
+      onRelease: (step) => {
+        const scroller = scrollerRef.current;
+        const from = dragFrom.current;
+        dragFrom.current = null;
+        if (!scroller || !from) return;
+        goTo(Math.min(Math.max(from.index + step, 0), groups.length - 1));
+        // Snapping back on once the smooth scroll has settled.
+        setTimeout(
+          () => scroller.style.removeProperty("scroll-snap-type"),
+          400,
+        );
+      },
+    },
+    "(width < 64rem)",
+  );
 
   return (
     <>
