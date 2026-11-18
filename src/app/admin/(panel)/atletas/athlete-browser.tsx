@@ -17,6 +17,7 @@ import {
   type AthleteFilters,
   compareNames,
   filterAthletes,
+  highlightParts,
   letterOf,
   NO_FILTERS,
   suggestions,
@@ -230,7 +231,17 @@ function SearchBox({
                 onClick={() => pick(athlete)}
                 className="flex w-full flex-col items-start px-4 py-2.5 text-left active:bg-zinc-100 dark:active:bg-zinc-800"
               >
-                <span className="font-medium">{athlete.name}</span>
+                <span className="font-normal">
+                  {highlightParts(athlete.name, text).map((part, index) =>
+                    part.match ? (
+                      <strong key={index} className="font-bold">
+                        {part.text}
+                      </strong>
+                    ) : (
+                      part.text
+                    ),
+                  )}
+                </span>
                 <span className="text-xs text-zinc-500">
                   {athlete.club.name}
                   {athlete.ci && ` · CI ${athlete.ci}`}

@@ -5,6 +5,7 @@ import type { Athlete } from "@/lib/api/types";
 import {
   compareNames,
   filterAthletes,
+  highlightParts,
   letterOf,
   matchesQuery,
   NO_FILTERS,
@@ -68,6 +69,44 @@ describe("suggestions", () => {
     expect(suggestions(athletes, "pe").map((a) => a.id)).toEqual([1, 2]);
     expect(suggestions(athletes, "a", 2)).toHaveLength(2);
     expect(suggestions(athletes, "   ")).toEqual([]);
+  });
+});
+
+describe("highlightParts", () => {
+  it("marks the matching part, ignoring accents and case", () => {
+    expect(highlightParts("José Pérez", "jose")).toEqual([
+      { text: "José", match: true },
+      { text: " Pérez", match: false },
+    ]);
+    expect(highlightParts("Ana PEREZ", "pérez")).toEqual([
+      { text: "Ana ", match: false },
+      { text: "PEREZ", match: true },
+    ]);
+  });
+
+  it("marks every occurrence", () => {
+    expect(highlightParts("Ana Mariana", "ana")).toEqual([
+      { text: "Ana", match: true },
+      { text: " Mari", match: false },
+      { text: "ana", match: true },
+    ]);
+  });
+
+  it("keeps the text whole when nothing matches or the query is empty", () => {
+    expect(highlightParts("Luis", "x")).toEqual([
+      { text: "Luis", match: false },
+    ]);
+    expect(highlightParts("Luis", "  ")).toEqual([
+      { text: "Luis", match: false },
+    ]);
+  });
+
+  it("works with Ñ and accents in the middle of a word", () => {
+    expect(highlightParts("Íñiguez", "nig")).toEqual([
+      { text: "Í", match: false },
+      { text: "ñig", match: true },
+      { text: "uez", match: false },
+    ]);
   });
 });
 
