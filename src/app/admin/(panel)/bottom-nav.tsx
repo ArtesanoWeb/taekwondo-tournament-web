@@ -6,6 +6,8 @@ import { type ReactNode, Suspense } from "react";
 
 import { hidesBottomNavOnPhone } from "@/lib/phone-screens";
 
+import { goToSection } from "./section-carousel";
+
 const iconProps = {
   "aria-hidden": true,
   width: 24,
@@ -77,6 +79,9 @@ function Tab({
     <li>
       <Link
         href={href}
+        onClick={(event) => {
+          if (goToSection(href)) event.preventDefault();
+        }}
         aria-current={active ? "page" : undefined}
         className={`${itemClass} ${active ? activeClass : inactiveClass}`}
       >
@@ -93,6 +98,9 @@ function CenterTab({ active }: { active: boolean }) {
     <li>
       <Link
         href="/admin/torneos"
+        onClick={(event) => {
+          if (goToSection("/admin/torneos")) event.preventDefault();
+        }}
         aria-current={active ? "page" : undefined}
         className={`${itemClass} ${active ? activeClass : inactiveClass}`}
       >

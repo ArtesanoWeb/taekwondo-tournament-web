@@ -41,6 +41,18 @@
   color-scheme: dark;
 }
 
+/* Admin sections off screen in the phone carousel: their floating buttons (fixed to the screen)
+   must not show over the section on screen. */
+[data-section-panel]:not([data-active]) .fixed {
+  display: none;
+}
+
+/* A sideways swipe changes the tab or section: it must not also trigger the browser's overscroll
+   "back" navigation. The viewport takes this from the root element, not from <body>. */
+html {
+  overscroll-behavior-x: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

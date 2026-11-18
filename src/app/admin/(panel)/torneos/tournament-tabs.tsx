@@ -19,8 +19,9 @@ type TournamentTabsProps = {
 };
 
 /**
- * Below `lg`: one group at a time, swiping with native scroll-snap or tapping the bar on top.
- * From `lg` up: every group side by side in columns.
+ * Below `lg`: one group at a time, changed only with the bar on top (it scrolls to the group): a
+ * sideways swipe belongs to the admin's sections (`SectionSwipe`). From `lg` up: every group side
+ * by side in columns.
  */
 export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
   const { active, scrollerRef, panelRef, goTo, onScroll } =
@@ -51,14 +52,14 @@ export function TournamentTabs({ groups, initialIndex }: TournamentTabsProps) {
           scrollerRef.current = element;
         }}
         onScroll={onScroll}
-        className="relative flex h-(--panel-height) snap-x snap-mandatory [scrollbar-width:none] items-start gap-4 overflow-x-auto overflow-y-hidden lg:grid lg:h-auto lg:grid-cols-3 lg:overflow-visible"
+        className="relative flex h-(--panel-height) items-start gap-4 overflow-hidden lg:grid lg:h-auto lg:grid-cols-3 lg:overflow-visible"
       >
         {groups.map((group, index) => (
           <section
             key={group.key}
             ref={panelRef(index)}
             aria-label={group.label}
-            className="w-full shrink-0 snap-start pb-20 sm:pb-1 lg:pb-0"
+            className="w-full shrink-0 pb-20 sm:pb-1 lg:pb-0"
           >
             <h2 className="mb-3 hidden text-lg font-semibold lg:block">
               {group.label}
