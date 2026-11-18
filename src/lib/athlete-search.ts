@@ -42,6 +42,48 @@ export function filterAthletes(
   );
 }
 
+export type TextPart = { text: string; match: boolean };
+
+/**
+ * `text` cut into the parts that match `query` and the rest, comparing like the search does
+ * (`normalize`: no accents or case), so `jose` marks the `José` in `José Pérez`. Every
+ * occurrence is marked; without a match it's a single unmarked part.
+ */
+export function highlightParts(text: string, query: string): TextPart[] {
+  const wanted = normalize(query);
+  if (!wanted) return [{ text, match: false }];
+
+  // Normalize character by character, remembering where each original character starts, so a
+  // match found in the normalized text maps back to the original (accents change the length).
+  const chars = [...text];
+  let flat = "";
+  const startOf: number[] = [];
+  chars.forEach((char, index) => {
+    const plain = char
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase();
+    for (let i = 0; i < plain.length; i++) startOf.push(index);
+    flat += plain;
+  });
+
+  const parts: TextPart[] = [];
+  let from = 0; // in original characters
+  let at = flat.indexOf(wanted);
+  while (at !== -1) {
+    const start = startOf[at];
+    const end = startOf[at + wanted.length - 1] + 1;
+    if (start > from)
+      parts.push({ text: chars.slice(from, start).join(""), match: false });
+    parts.push({ text: chars.slice(start, end).join(""), match: true });
+    from = end;
+    at = flat.indexOf(wanted, at + wanted.length);
+  }
+  if (from < chars.length)
+    parts.push({ text: chars.slice(from).join(""), match: false });
+  return parts;
+}
+
 /** Up to `limit` athletes for the search box, those whose name starts with the text first. */
 export function suggestions(
   athletes: Athlete[],

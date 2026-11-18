@@ -1,14 +1,16 @@
 /**
  * Screens that take the whole phone screen. On all of them the site header hides and the title
- * shows the way out instead (`TitleBar`); the admin's full-screen forms also hide the bottom bar,
- * so the only ways out are closing or submitting the form.
+ * shows the way out instead (`TitleBar`). In the admin they also hide the bottom bar: inside a
+ * tournament (and its categories) and on full-screen forms, the way out is the title's arrow or X.
  */
-const fullscreenForms = [/^\/admin\/torneos\/nuevo$/];
-
-const screensWithoutHeader = [
-  ...fullscreenForms,
+const adminScreensWithoutBottomNav = [
+  /^\/admin\/torneos\/nuevo$/,
   /^\/admin\/torneos\/\d+$/,
   /^\/admin\/categorias\/\d+$/,
+];
+
+const screensWithoutHeader = [
+  ...adminScreensWithoutBottomNav,
   // The public site's detail pages.
   /^\/torneos\/\d+$/,
   /^\/categorias\/\d+$/,
@@ -18,4 +20,4 @@ export const hidesHeaderOnPhone = (pathname: string) =>
   screensWithoutHeader.some((route) => route.test(pathname));
 
 export const hidesBottomNavOnPhone = (pathname: string) =>
-  fullscreenForms.some((route) => route.test(pathname));
+  adminScreensWithoutBottomNav.some((route) => route.test(pathname));

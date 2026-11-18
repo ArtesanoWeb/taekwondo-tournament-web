@@ -99,6 +99,46 @@ export function bracketStats(matches: Match[]): BracketStats {
 }
 
 /** The winner of the final once it's been fought, or `null` while it's still on. */
+export type Placed = { id: number; name: string };
+
+/** The other athlete of a match, as `{ id, name }`, or null when that side is empty. */
+function opponent(match: Match, athleteId: number): Placed | null {
+  const red = match.athlete_red_id === athleteId;
+  const id = red ? match.athlete_blue_id : match.athlete_red_id;
+  const name = red ? match.athlete_blue_name : match.athlete_red_name;
+  return id === null ? null : { id, name: name ?? "" };
+}
+
+/**
+ * The category's podium once the final is over: gold the champion, silver who lost the final and
+ * bronze the semifinalist who lost to the champion (one bronze, no match for it, as Abel decided).
+ * No bronze without a semifinal, or when the champion's semifinal was a bye. `null` before the
+ * final ends.
+ */
+export function podium(
+  matches: Match[],
+): { gold: Placed; silver: Placed | null; bronze: Placed | null } | null {
+  const gold = champion(matches);
+  if (!gold) return null;
+  const finalRound = Math.max(...matches.map((match) => match.round_number));
+  const inRound = (round: number) =>
+    matches.find(
+      (match) =>
+        match.round_number === round &&
+        (match.athlete_red_id === gold.id || match.athlete_blue_id === gold.id),
+    );
+  const final = inRound(finalRound);
+  const semifinal = inRound(finalRound - 1);
+  return {
+    gold,
+    silver: final ? opponent(final, gold.id) : null,
+    bronze:
+      semifinal && semifinal.status === "finished"
+        ? opponent(semifinal, gold.id)
+        : null,
+  };
+}
+
 export function champion(
   matches: Match[],
 ): { id: number; name: string } | null {

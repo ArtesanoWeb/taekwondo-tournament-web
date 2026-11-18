@@ -7,7 +7,13 @@ import { LOGIN_PATH } from "@/lib/auth";
 import { hidesHeaderOnPhone } from "@/lib/phone-screens";
 
 import { LogoutButton } from "./logout-button";
-import { headerClass, headerRowClass } from "./header-classes";
+import {
+  headerActionsClass,
+  headerClass,
+  headerRowClass,
+  themeToggleClass,
+} from "./header-classes";
+import { ThemeToggle } from "./theme-toggle";
 
 const logoutIcon = (
   <svg
@@ -28,8 +34,8 @@ const logoutIcon = (
 
 /**
  * The site header as it depends on the route: hidden on phones on full-screen views (see
- * `phone-screens`), and with a logout button on the admin's screens, on phones only (on larger
- * screens the admin menu has it).
+ * `phone-screens`), with the theme toggle everywhere and a logout button on the admin's screens,
+ * on phones only (on larger screens the admin menu has it).
  */
 const inAdmin = (pathname: string) =>
   pathname.startsWith("/admin") && !pathname.startsWith(LOGIN_PATH);
@@ -41,11 +47,14 @@ export function HeaderFrame({ brand }: { brand: ReactNode }) {
     <header className={hidden ? `${headerClass} max-sm:hidden` : headerClass}>
       <div className={headerRowClass}>
         {brand}
-        {inAdmin(pathname) && (
-          <LogoutButton className="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white active:bg-zinc-700 sm:hidden dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300">
-            {logoutIcon}
-          </LogoutButton>
-        )}
+        <div className={headerActionsClass}>
+          <ThemeToggle className={themeToggleClass} />
+          {inAdmin(pathname) && (
+            <LogoutButton className="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white active:bg-zinc-700 sm:hidden dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300">
+              {logoutIcon}
+            </LogoutButton>
+          )}
+        </div>
       </div>
     </header>
   );

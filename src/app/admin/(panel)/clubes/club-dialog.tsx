@@ -12,6 +12,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/button-classes";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { FormError } from "@/components/form-error";
 import type { Club } from "@/lib/api/types";
 
@@ -71,7 +72,10 @@ function ClubDialog({ club, onClose }: { club?: Club; onClose: () => void }) {
   return (
     <dialog
       ref={dialogRef}
-      onClose={onClose}
+      // React bubbles `close` from the nested confirmation: only this dialog's own close counts.
+      onClose={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
       aria-label={title}
       className="m-auto w-[calc(100%-2rem)] max-w-md rounded-lg bg-white p-5 text-zinc-950 shadow-xl backdrop:bg-black/50 dark:bg-zinc-900 dark:text-zinc-50"
     >
@@ -98,13 +102,19 @@ function ClubDialog({ club, onClose }: { club?: Club; onClose: () => void }) {
           >
             Cancelar
           </button>
-          <button
-            type="submit"
+          <ConfirmSubmitButton
             disabled={isPending}
             className={primaryButtonClass}
+            title={club ? "¿Guardar los cambios?" : "¿Crear el club?"}
+            confirmLabel={club ? "Sí, guardar" : "Sí, crear"}
+            message={
+              club
+                ? `El nuevo nombre de «${club.name}» se verá en todo el sitio.`
+                : "Después podrás asignarle atletas."
+            }
           >
             {isPending ? "Guardando…" : "Guardar"}
-          </button>
+          </ConfirmSubmitButton>
         </div>
       </form>
     </dialog>

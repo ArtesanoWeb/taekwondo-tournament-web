@@ -1,8 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 
+import { useScreenSwipe } from "@/components/use-screen-swipe";
+import { RestoreScrollScript } from "@/components/restore-scroll-script";
 import { useSwipeTabs } from "@/components/use-swipe-tabs";
+
+/** Where the active tab is remembered (`scroll-memory`). */
+const TABS_KEY = "pestañas:inicio";
 
 const iconProps = {
   "aria-hidden": true,
@@ -47,7 +52,8 @@ type PublicGroup = {
 };
 
 /**
- * Below `lg`: one group at a time, swiping or tapping the bottom bar, within thumb reach.
+ * Below `lg`: one group at a time, swiping anywhere on the screen or tapping the bottom bar,
+ * within thumb reach.
  * From `lg` up: the three groups side by side in columns.
  */
 export function PublicTournamentTabs({
@@ -57,8 +63,40 @@ export function PublicTournamentTabs({
   groups: PublicGroup[];
   initialIndex: number;
 }) {
-  const { active, scrollerRef, panelRef, goTo, onScroll } =
-    useSwipeTabs(initialIndex);
+  const { active, scrollerRef, panelRef, goTo, onScroll } = useSwipeTabs(
+    initialIndex,
+    { key: TABS_KEY, count: groups.length },
+  );
+  // Over the list the native scroll-snap swipes; this makes the rest of the screen do the same:
+  // the panels follow the finger, and settle on the next one or back when it lifts.
+  const dragFrom = useRef<{ index: number; left: number } | null>(null);
+  useScreenSwipe(
+    {
+      onDrag: (dx) => {
+        const scroller = scrollerRef.current;
+        if (!scroller) return;
+        if (!dragFrom.current) {
+          dragFrom.current = { index: active, left: scroller.scrollLeft };
+          // Snapping would fight the finger while it drags.
+          scroller.style.scrollSnapType = "none";
+        }
+        scroller.scrollLeft = dragFrom.current.left - dx;
+      },
+      onRelease: (step) => {
+        const scroller = scrollerRef.current;
+        const from = dragFrom.current;
+        dragFrom.current = null;
+        if (!scroller || !from) return;
+        goTo(Math.min(Math.max(from.index + step, 0), groups.length - 1));
+        // Snapping back on once the smooth scroll has settled.
+        setTimeout(
+          () => scroller.style.removeProperty("scroll-snap-type"),
+          400,
+        );
+      },
+    },
+    "(width < 64rem)",
+  );
 
   return (
     <>
@@ -77,7 +115,7 @@ export function PublicTournamentTabs({
             className="w-full shrink-0 snap-start pb-1"
           >
             <h2 className="mb-3 hidden text-xl font-semibold lg:block">
-              {group.label} ({group.count})
+              {group.label}
             </h2>
             {group.count > 0 ? (
               <ul className="flex flex-col gap-3">{group.cards}</ul>
@@ -89,6 +127,7 @@ export function PublicTournamentTabs({
           </section>
         ))}
       </div>
+      <RestoreScrollScript storageKey={TABS_KEY} mode="tab" />
 
       <nav
         aria-label="Estado de los torneos"
