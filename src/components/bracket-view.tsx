@@ -7,6 +7,7 @@ import {
   podium,
   currentRoundIndex,
   groupRounds,
+  matchesToScore,
   roundsWon,
 } from "@/lib/bracket";
 import { matchStatusLabels } from "@/lib/labels";
@@ -36,6 +37,10 @@ export function BracketView({
   onSelectMatch?: (matchId: number) => void;
 }) {
   const rounds = groupRounds(bracket.matches);
+  // For visitors, the matches the admin can score now: both athletes known and not fought yet.
+  const liveIds = selectableIds
+    ? new Set<number>()
+    : new Set(matchesToScore(bracket.matches).map((match) => match.id));
   const initialRound = currentRoundIndex(rounds);
   const scrollerRef = useRef<HTMLOListElement>(null);
   const places = podium(bracket.matches);
@@ -87,6 +92,7 @@ export function BracketView({
                     <MatchCard
                       match={match}
                       clubs={clubs}
+                      live={liveIds.has(match.id)}
                       onSelect={
                         selectableIds?.has(match.id)
                           ? () => onSelectMatch?.(match.id)
@@ -123,10 +129,13 @@ function Connector() {
 function MatchCard({
   match,
   clubs,
+  live = false,
   onSelect,
 }: {
   match: Match;
   clubs: Record<number, string>;
+  /** Ready to be fought: highlighted for visitors as the match being played. */
+  live?: boolean;
   onSelect?: () => void;
 }) {
   const won = roundsWon(match);
@@ -158,7 +167,9 @@ function MatchCard({
       className={`relative w-full overflow-hidden rounded-lg border bg-white text-sm dark:bg-zinc-950 ${
         onSelect
           ? "border-blue-500 ring-1 ring-blue-500/40 dark:border-blue-400"
-          : "border-zinc-200 dark:border-zinc-800"
+          : live
+            ? "border-hong ring-hong/30 ring-1"
+            : "border-zinc-200 dark:border-zinc-800"
       }`}
     >
       <Side {...side("red")} />
@@ -168,10 +179,24 @@ function MatchCard({
         className={`border-t px-3 py-1 text-xs ${
           onSelect
             ? "border-blue-100 bg-blue-50 font-medium text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300"
-            : "border-zinc-100 bg-zinc-50 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900"
+            : live
+              ? "flex items-center gap-1.5 border-red-100 bg-red-50 font-semibold text-red-700 dark:border-red-950 dark:bg-red-950/40 dark:text-red-300"
+              : "border-zinc-100 bg-zinc-50 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900"
         }`}
       >
-        {onSelect ? "Tocar para anotar" : matchStatusLabels[match.status]}
+        {onSelect ? (
+          "Tocar para anotar"
+        ) : live ? (
+          <>
+            <span aria-hidden className="relative flex size-2">
+              <span className="bg-hong absolute inline-flex size-full animate-ping rounded-full opacity-60 motion-reduce:animate-none" />
+              <span className="bg-hong relative inline-flex size-2 rounded-full" />
+            </span>
+            Combate en curso
+          </>
+        ) : (
+          matchStatusLabels[match.status]
+        )}
       </p>
       {onSelect && (
         // Laid over the card: a <button> can't contain the card's block markup.
