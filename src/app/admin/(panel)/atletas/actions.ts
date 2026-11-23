@@ -1,6 +1,8 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
+
+import { PUBLIC_TAG } from "@/lib/api/tags";
 
 import {
   type AthleteFormValues,
@@ -61,6 +63,8 @@ export async function saveAthlete(
       : { error: message, values };
   }
 
+  // Names show in public brackets and registrant lists.
+  updateTag(PUBLIC_TAG);
   refresh();
   return { saved: true };
 }

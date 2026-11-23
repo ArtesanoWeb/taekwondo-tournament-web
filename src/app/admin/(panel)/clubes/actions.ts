@@ -1,6 +1,8 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
+
+import { PUBLIC_TAG } from "@/lib/api/tags";
 
 import { adminAttempt, getAdminApi } from "@/lib/session";
 
@@ -29,6 +31,8 @@ export async function saveClub(
   // 409 when another club already has that name.
   if (!result.ok) return { error: result.error.message, name: typed };
 
+  // Names show in public brackets and registrant lists.
+  updateTag(PUBLIC_TAG);
   refresh();
   return { saved: true };
 }
