@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useRef, useState } from "react";
 
 import { ConfirmDialog } from "./confirm-dialog";
 
@@ -11,8 +11,11 @@ type ConfirmSubmitButtonProps = {
   children: ReactNode;
   title: ReactNode;
   confirmLabel: string;
-  /** What the confirmation explains. */
-  message: ReactNode;
+  /**
+   * What the confirmation explains. As a function it gets the form when the button is tapped, so
+   * it can show what's typed at that moment.
+   */
+  message: ReactNode | ((form: HTMLFormElement) => ReactNode);
 };
 
 /**
@@ -28,15 +31,19 @@ export function ConfirmSubmitButton({
   message,
 }: ConfirmSubmitButtonProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [content, setContent] = useState<ReactNode>(
+    typeof message === "function" ? null : message,
+  );
   return (
     <>
       <button
         type="button"
         disabled={disabled}
         onClick={(event) => {
-          if (event.currentTarget.form?.reportValidity()) {
-            dialogRef.current?.showModal();
-          }
+          const form = event.currentTarget.form;
+          if (!form?.reportValidity()) return;
+          setContent(typeof message === "function" ? message(form) : message);
+          dialogRef.current?.showModal();
         }}
         className={className}
       >
@@ -47,7 +54,7 @@ export function ConfirmSubmitButton({
         title={title}
         confirmLabel={confirmLabel}
       >
-        {message}
+        {content}
       </ConfirmDialog>
     </>
   );

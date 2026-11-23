@@ -13,6 +13,8 @@ import {
   secondaryButtonClass,
 } from "@/components/button-classes";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { ConfirmSummary } from "@/components/confirm-summary";
+import { clubSummary, formValues } from "@/lib/confirm-summary";
 import { FormError } from "@/components/form-error";
 import type { Club } from "@/lib/api/types";
 
@@ -107,11 +109,19 @@ function ClubDialog({ club, onClose }: { club?: Club; onClose: () => void }) {
             className={primaryButtonClass}
             title={club ? "¿Guardar los cambios?" : "¿Crear el club?"}
             confirmLabel={club ? "Sí, guardar" : "Sí, crear"}
-            message={
-              club
-                ? `El nuevo nombre de «${club.name}» se verá en todo el sitio.`
-                : "Después podrás asignarle atletas."
-            }
+            message={(form) => (
+              <ConfirmSummary
+                rows={clubSummary(
+                  formValues(form, { name: "" }).name,
+                  club?.name,
+                )}
+                note={
+                  club
+                    ? "El nuevo nombre se verá en todo el sitio."
+                    : "Después podrás asignarle atletas."
+                }
+              />
+            )}
           >
             {isPending ? "Guardando…" : "Guardar"}
           </ConfirmSubmitButton>
