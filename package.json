@@ -12,7 +12,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "api:types": "openapi-typescript ${API_URL:-https://taekwondo-tournament-manager-dev.onrender.com}/openapi.json -o src/lib/api/schema.d.ts",
     "test": "vitest run",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "e2e:api": "bash scripts/e2e-api.sh",
+    "e2e": "next build && playwright test"
   },
   "dependencies": {
     "next": "16.4.3",
@@ -22,6 +24,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
