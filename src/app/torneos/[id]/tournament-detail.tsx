@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BracketStatsSummary } from "@/components/bracket-stats";
 import { ErrorNotice } from "@/components/error-notice";
+import { RankingLink } from "@/components/ranking-link";
 import { LiveRefresh } from "@/components/live-refresh";
 import { TitleBar } from "@/components/title-bar";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
@@ -64,6 +65,10 @@ export async function TournamentDetail({
           </div>
         }
       />
+
+      {tournament.data.status !== "draft" && (
+        <RankingLink href={`/torneos/${tournament.data.id}/ranking`} />
+      )}
 
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-semibold">Categorías</h2>

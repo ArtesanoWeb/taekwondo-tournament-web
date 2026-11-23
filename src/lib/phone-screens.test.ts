@@ -9,6 +9,8 @@ describe("phone screens", () => {
     expect(hidesHeaderOnPhone("/admin/categorias/10")).toBe(true);
     expect(hidesHeaderOnPhone("/torneos/4")).toBe(true);
     expect(hidesHeaderOnPhone("/categorias/10")).toBe(true);
+    expect(hidesHeaderOnPhone("/torneos/4/ranking")).toBe(true);
+    expect(hidesHeaderOnPhone("/admin/rankings/4")).toBe(true);
   });
 
   it("keeps the header on lists", () => {
@@ -22,6 +24,7 @@ describe("phone screens", () => {
     expect(hidesBottomNavOnPhone("/admin/torneos/nuevo")).toBe(true);
     expect(hidesBottomNavOnPhone("/admin/torneos/4")).toBe(true);
     expect(hidesBottomNavOnPhone("/admin/categorias/10")).toBe(true);
+    expect(hidesBottomNavOnPhone("/admin/rankings/4")).toBe(true);
   });
 
   it("keeps the bottom bar on the sections", () => {
