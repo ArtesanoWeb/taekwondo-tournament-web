@@ -132,7 +132,13 @@ test.describe("ciclo de un torneo en el admin", () => {
       await expect(confirm).toContainText("Cadete · Hasta 50kg");
       await confirm.getByRole("button", { name: "Sí, inscribir" }).click();
       await dialog.getByRole("button", { name: "Cerrar" }).click();
-      await expect(page.getByText(name, { exact: true })).toBeVisible();
+      // In the list of registrants: the row with its «Retirar» button.
+      await expect(
+        page
+          .getByRole("listitem")
+          .filter({ hasText: name })
+          .filter({ has: page.getByRole("button", { name: "Retirar" }) }),
+      ).toBeVisible();
     }
   });
 
