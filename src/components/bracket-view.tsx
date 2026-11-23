@@ -1,18 +1,20 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 import type { Bracket, Match } from "@/lib/api/types";
 import {
   podium,
   currentRoundIndex,
   groupRounds,
+  hasMatchDetail,
   matchesToScore,
   roundsWon,
 } from "@/lib/bracket";
 import { matchStatusLabels } from "@/lib/labels";
 import { recall, remember } from "@/lib/scroll-memory";
 
+import { MatchDetailDialog } from "./match-detail-dialog";
 import { Medal } from "./medal";
 import { RestoreScrollScript } from "./restore-scroll-script";
 
@@ -37,6 +39,9 @@ export function BracketView({
   onSelectMatch?: (matchId: number) => void;
 }) {
   const rounds = groupRounds(bracket.matches);
+  // By id, read from the bracket on each render: a refreshed bracket updates the open detail.
+  const [detailId, setDetailId] = useState<number | null>(null);
+  const detail = bracket.matches.find((match) => match.id === detailId);
   // For visitors, the matches the admin can score now: both athletes known and not fought yet.
   const liveIds = selectableIds
     ? new Set<number>()
@@ -98,6 +103,11 @@ export function BracketView({
                           ? () => onSelectMatch?.(match.id)
                           : undefined
                       }
+                      onOpen={
+                        hasMatchDetail(match)
+                          ? () => setDetailId(match.id)
+                          : undefined
+                      }
                     />
                   </li>
                 ))}
@@ -107,6 +117,19 @@ export function BracketView({
         </ol>
         <RestoreScrollScript storageKey={memoryKey} mode="offset" />
       </div>
+      {detail && (
+        <MatchDetailDialog
+          key={detail.id}
+          match={detail}
+          roundName={
+            rounds.find((round) => round.number === detail.round_number)
+              ?.name ?? ""
+          }
+          clubs={clubs}
+          live={liveIds.has(detail.id)}
+          onClose={() => setDetailId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -131,12 +154,15 @@ function MatchCard({
   clubs,
   live = false,
   onSelect,
+  onOpen,
 }: {
   match: Match;
   clubs: Record<number, string>;
   /** Ready to be fought: highlighted for visitors as the match being played. */
   live?: boolean;
   onSelect?: () => void;
+  /** Opens the match round by round; scoring (`onSelect`) takes precedence for the admin. */
+  onOpen?: () => void;
 }) {
   const won = roundsWon(match);
   const hasScores = match.round_scores.length > 0;
@@ -205,6 +231,14 @@ function MatchCard({
           onClick={onSelect}
           aria-label={`Anotar: ${match.athlete_red_name} contra ${match.athlete_blue_name}`}
           className="absolute inset-0 active:bg-blue-500/10"
+        />
+      )}
+      {!onSelect && onOpen && (
+        <button
+          type="button"
+          onClick={onOpen}
+          aria-label={`Ver combate: ${match.athlete_red_name ?? "por definir"} contra ${match.athlete_blue_name ?? "por definir"}`}
+          className="absolute inset-0 hover:bg-zinc-500/5 active:bg-zinc-500/10"
         />
       )}
     </div>

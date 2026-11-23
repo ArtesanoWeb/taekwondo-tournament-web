@@ -157,3 +157,35 @@ export function champion(
       : final.athlete_blue_name);
   return { id: final.winner_id, name: name ?? "" };
 }
+
+export type RoundRow = {
+  number: number;
+  red: number;
+  blue: number;
+  /** The side that won the round, or null if the API didn't name a winner. */
+  winner: "red" | "blue" | null;
+};
+
+/** A match's rounds in order, with which side won each one. */
+export function roundRows(match: Match): RoundRow[] {
+  return match.round_scores
+    .toSorted((a, b) => a.round_number - b.round_number)
+    .map((score) => ({
+      number: score.round_number,
+      red: score.red_points,
+      blue: score.blue_points,
+      winner:
+        score.round_winner_id === null
+          ? null
+          : score.round_winner_id === match.athlete_red_id
+            ? "red"
+            : score.round_winner_id === match.athlete_blue_id
+              ? "blue"
+              : null,
+    }));
+}
+
+/** Whether there's anything to show when tapping a match: at least one athlete in it. */
+export function hasMatchDetail(match: Match): boolean {
+  return match.athlete_red_id !== null || match.athlete_blue_id !== null;
+}
