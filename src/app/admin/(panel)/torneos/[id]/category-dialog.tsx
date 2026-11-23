@@ -8,6 +8,8 @@ import {
   secondaryButtonClass,
 } from "@/components/button-classes";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { ConfirmSummary } from "@/components/confirm-summary";
+import { categorySummary, formValues } from "@/lib/confirm-summary";
 import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
 import { EMPTY_CATEGORY_VALUES } from "@/lib/category-form";
@@ -224,7 +226,12 @@ function CategoryDialog({
             className={primaryButtonClass}
             title="¿Crear la categoría?"
             confirmLabel="Sí, crear"
-            message="Después podrás inscribir atletas en ella."
+            message={(form) => (
+              <ConfirmSummary
+                rows={categorySummary(formValues(form, EMPTY_CATEGORY_VALUES))}
+                note="Después podrás inscribir atletas en ella."
+              />
+            )}
           >
             {isPending ? "Creando…" : "Crear categoría"}
           </ConfirmSubmitButton>

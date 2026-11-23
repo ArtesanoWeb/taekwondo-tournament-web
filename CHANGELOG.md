@@ -7,6 +7,48 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-23
+
+El público sigue el torneo en vivo y las vistas cargan más rápido: la llave se actualiza sola, los
+combates en curso se resaltan, cada combate se abre round por round y cada torneo tiene su ranking
+de clubes.
+
+### Added
+
+- Vista pública en vivo: mientras el torneo está en curso, la página del torneo y la de la categoría
+  se actualizan solas cada 5 s y muestran «En vivo · Actualizado a las HH:MM» (#127).
+- Llave pública: los combates listos para anotar se resaltan como «Combate en curso» (#135).
+- Detalle de cada combate: al tocarlo en la llave se ven los puntos de cada round, quién ganó cada
+  uno y cómo terminó; con el detalle abierto, un round nuevo aparece solo (#13).
+- Ranking de clubes de cada torneo (oro 7, plata 3, bronce 1 y categoría sin pelea 1), en el sitio
+  público desde la página del torneo y en el admin (#128).
+- Administración: las confirmaciones muestran todos los datos que se van a guardar y, al editar, qué
+  cambia (#134).
+- Pruebas E2E con Playwright (vista pública y ciclo completo de un torneo, en celular y PC) en el CI
+  (#129).
+
+### Changed
+
+- Las vistas públicas cargan más rápido: las lecturas se guardan unos segundos y las comparten todos
+  los visitantes, y la página del torneo solo pide las llaves ya sorteadas (#132).
+- El cinturón de los grados intermedios se ve mitad de su color y mitad del siguiente (#133).
+- Administración: «Rankings» lista los torneos iniciados, cada uno con su ranking real; se quitan los
+  datos de ejemplo (#128).
+
+### Fixed
+
+- `npm run seed` volvió a cargar los datos de prueba con la API 0.6/0.7 (#129).
+
+### Known issues
+
+- Inscribir: todavía se ofrecen todos los atletas, no solo los que encajan en la categoría (#78);
+  espera el endpoint de la API 0.8.0.
+- Todos los combates listos de una ronda se ven «en curso»: la API todavía no distingue el que se
+  está peleando.
+- Un round nuevo se ve en el sitio público en unos 5 s, no al instante (el tiempo real está por
+  decidir con el backend).
+- El perfil de «Más» sigue siendo un prototipo.
+
 ## [0.6.0] - 2026-11-18
 
 Pulido del admin y del celular: se navega deslizando el dedo, el sistema recuerda dónde quedaste,
@@ -238,7 +280,8 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.6.0...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.7.0...develop
+[0.7.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.1...v0.5.0

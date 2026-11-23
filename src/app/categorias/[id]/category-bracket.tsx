@@ -2,8 +2,14 @@ import { notFound } from "next/navigation";
 
 import { BracketView } from "@/components/bracket-view";
 import { ErrorNotice } from "@/components/error-notice";
+import { LiveRefresh } from "@/components/live-refresh";
 import { TitleBar } from "@/components/title-bar";
-import { api, attempt } from "@/lib/api/client";
+import {
+  getBracket,
+  getCategory,
+  getRegistrants,
+  getTournament,
+} from "@/lib/api/public";
 import { formatAgeRange } from "@/lib/categories";
 import { formatDateTime } from "@/lib/format";
 import { beltGroupLabels, genderLabels } from "@/lib/labels";
@@ -16,13 +22,13 @@ export async function CategoryBracket({
 }) {
   const { id } = await params;
   if (!/^\d+$/.test(id)) notFound();
-  const path = { params: { path: { category_id: Number(id) } } };
+  const categoryId = Number(id);
 
   // Registrants are fetched together: they're what's shown while there's no bracket.
   const [category, bracket, registrants] = await Promise.all([
-    attempt(api.GET("/api/v1/categories/{category_id}", path)),
-    attempt(api.GET("/api/v1/categories/{category_id}/bracket", path)),
-    attempt(api.GET("/api/v1/categories/{category_id}/registrants", path)),
+    getCategory(categoryId),
+    getBracket(categoryId),
+    getRegistrants(categoryId),
   ]);
 
   if (!category.ok) {
@@ -30,12 +36,11 @@ export async function CategoryBracket({
     return <ErrorNotice message={category.error.message} />;
   }
 
-  const tournament = await attempt(
-    api.GET("/api/v1/tournaments/{tournament_id}", {
-      params: { path: { tournament_id: category.data.tournament_id } },
-    }),
-  );
+  const tournament = await getTournament(category.data.tournament_id);
   const enrollmentOpen = tournament.ok && tournament.data.status === "draft";
+  const inProgress = tournament.ok && tournament.data.status === "in_progress";
+  // The bracket is what changes during the tournament; it's cached for a few seconds.
+  const updatedAt = bracket.ok ? bracket.fetchedAt : category.fetchedAt;
 
   return (
     <>
@@ -44,13 +49,16 @@ export async function CategoryBracket({
         parentHref={`/torneos/${category.data.tournament_id}`}
         parentLabel={tournament.ok ? tournament.data.name : "Torneo"}
         subtitle={
-          <p>
-            {genderLabels[category.data.gender]}
-            {" · "}
-            {formatAgeRange(category.data.min_age, category.data.max_age)}
-            {" · "}
-            {beltGroupLabels[category.data.belt_group]}
-          </p>
+          <div className="flex flex-col gap-2">
+            <p>
+              {genderLabels[category.data.gender]}
+              {" · "}
+              {formatAgeRange(category.data.min_age, category.data.max_age)}
+              {" · "}
+              {beltGroupLabels[category.data.belt_group]}
+            </p>
+            {inProgress && <LiveRefresh updatedAt={updatedAt} />}
+          </div>
         }
       />
 

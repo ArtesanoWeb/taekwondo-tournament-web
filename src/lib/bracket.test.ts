@@ -7,9 +7,11 @@ import {
   champion,
   currentRoundIndex,
   groupRounds,
+  hasMatchDetail,
   matchesToScore,
   pendingMatchCount,
   podium,
+  roundRows,
   roundName,
   roundsWon,
   shortRoundName,
@@ -276,5 +278,45 @@ describe("podium", () => {
       fight(3, 2, 0, ana, bea, null),
     ];
     expect(podium(matches)).toBeNull();
+  });
+});
+
+describe("roundRows", () => {
+  it("lists the rounds in order with the side that won each one", () => {
+    const fought = match(1, 1, 0, {
+      athlete_red_id: 10,
+      athlete_blue_id: 20,
+      round_scores: [
+        {
+          id: 2,
+          match_id: 1,
+          round_number: 2,
+          red_points: 3,
+          blue_points: 8,
+          round_winner_id: 20,
+        },
+        {
+          id: 1,
+          match_id: 1,
+          round_number: 1,
+          red_points: 9,
+          blue_points: 6,
+          round_winner_id: 10,
+        },
+      ],
+    });
+    expect(roundRows(fought)).toEqual([
+      { number: 1, red: 9, blue: 6, winner: "red" },
+      { number: 2, red: 3, blue: 8, winner: "blue" },
+    ]);
+  });
+});
+
+describe("hasMatchDetail", () => {
+  it("needs at least one athlete", () => {
+    expect(hasMatchDetail(match(1, 2, 0))).toBe(false);
+    expect(
+      hasMatchDetail(match(1, 1, 0, { athlete_red_id: 3, status: "bye" })),
+    ).toBe(true);
   });
 });

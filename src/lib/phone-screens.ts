@@ -7,6 +7,7 @@ const adminScreensWithoutBottomNav = [
   /^\/admin\/torneos\/nuevo$/,
   /^\/admin\/torneos\/\d+$/,
   /^\/admin\/categorias\/\d+$/,
+  /^\/admin\/rankings\/\d+$/,
 ];
 
 const screensWithoutHeader = [
@@ -14,6 +15,7 @@ const screensWithoutHeader = [
   // The public site's detail pages.
   /^\/torneos\/\d+$/,
   /^\/categorias\/\d+$/,
+  /^\/torneos\/\d+\/ranking$/,
 ];
 
 export const hidesHeaderOnPhone = (pathname: string) =>

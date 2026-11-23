@@ -8,7 +8,9 @@ import {
   secondaryButtonClass,
 } from "@/components/button-classes";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmSummary } from "@/components/confirm-summary";
 import { FormError } from "@/components/form-error";
+import { registrationSummary } from "@/lib/confirm-summary";
 import { type AthleteOption, filterAthleteOptions } from "@/lib/registrations";
 
 import { registerAthlete, type RegisterState } from "./actions";
@@ -17,11 +19,14 @@ const MAX_RESULTS = 50;
 
 type RegisterAthleteButtonProps = {
   categoryId: number;
+  /** Shown in the confirmation, such as «Cadete · Hasta 45kg». */
+  categoryName: string;
   options: AthleteOption[];
 };
 
 export function RegisterAthleteButton({
   categoryId,
+  categoryName,
   options,
 }: RegisterAthleteButtonProps) {
   // Mounted only while open, so closing discards the search and the messages.
@@ -39,6 +44,7 @@ export function RegisterAthleteButton({
       {open && (
         <RegisterDialog
           categoryId={categoryId}
+          categoryName={categoryName}
           options={options}
           onClose={() => setOpen(false)}
         />
@@ -49,6 +55,7 @@ export function RegisterAthleteButton({
 
 function RegisterDialog({
   categoryId,
+  categoryName,
   options,
   onClose,
 }: RegisterAthleteButtonProps & { onClose: () => void }) {
@@ -165,7 +172,11 @@ function RegisterDialog({
             title={`¿Inscribir a ${chosen?.name ?? ""}?`}
             confirmLabel="Sí, inscribir"
           >
-            {chosen && `${chosen.club} · ${chosen.weightKg} kg`}
+            {chosen && (
+              <ConfirmSummary
+                rows={registrationSummary(chosen, categoryName)}
+              />
+            )}
           </ConfirmDialog>
         </form>
 

@@ -46,6 +46,7 @@ export function ScoringBracket({
       {selected && (
         <ScoreDialog
           key={selected.id}
+          categoryId={bracket.category_id}
           match={selected}
           roundName={roundNames.get(selected.round_number)!}
           roundsToWin={roundsToWin}
@@ -57,11 +58,13 @@ export function ScoringBracket({
 }
 
 function ScoreDialog({
+  categoryId,
   match,
   roundName,
   roundsToWin,
   onClose,
 }: {
+  categoryId: number;
   match: Match;
   roundName: string;
   roundsToWin: number;
@@ -93,6 +96,7 @@ function ScoreDialog({
       <div className="p-5">
         <MatchScoreForm
           key={match.round_scores.length}
+          categoryId={categoryId}
           match={match}
           roundName={roundName}
           roundsToWin={roundsToWin}

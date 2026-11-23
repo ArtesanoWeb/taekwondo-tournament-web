@@ -131,8 +131,8 @@ async function createCategory(tournamentId, clubs, spec) {
       name: nextName(spec.category.gender),
       birth_date: `${2026 - spec.category.min_age}-0${(i % 9) + 1}-15`,
       gender: spec.category.gender,
-      belt_rank:
-        spec.category.belt_group === "black" ? "negro 1er dan" : "verde",
+      // Since API 0.7.0 athletes have a fixed grade (`kup_10` … `kup_1`, `dan`), not free text.
+      grade: spec.category.belt_group === "black" ? "dan" : "kup_6",
       weight_kg: weight - 1 - (i % 4),
       club_id: clubs[i % clubs.length].id,
     });
@@ -185,9 +185,10 @@ async function playMatches(categoryId, count) {
       .sort((a, b) => a.round_number - b.round_number || a.slot - b.slot)[0];
     if (!next) return;
     const pattern = SCORE_PATTERNS[next.id % SCORE_PATTERNS.length];
-    // The server numbers the rounds in the order they are posted.
-    for (const [red_points, blue_points] of pattern) {
+    // Since API 0.6.0 each round says its number: the next one after the last saved.
+    for (const [index, [red_points, blue_points]] of pattern.entries()) {
       await post(`/api/v1/matches/${next.id}/rounds`, {
+        round_number: index + 1,
         red_points,
         blue_points,
       });
