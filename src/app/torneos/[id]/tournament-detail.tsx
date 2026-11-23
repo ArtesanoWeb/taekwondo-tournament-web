@@ -6,7 +6,7 @@ import { ErrorNotice } from "@/components/error-notice";
 import { LiveRefresh } from "@/components/live-refresh";
 import { TitleBar } from "@/components/title-bar";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
-import { api, attempt } from "@/lib/api/client";
+import { getBracket, getCategories, getTournament } from "@/lib/api/public";
 import type { Category } from "@/lib/api/types";
 import { type BracketStats, bracketStats } from "@/lib/bracket";
 import { formatAgeRange, groupByGender } from "@/lib/categories";
@@ -23,16 +23,8 @@ export async function TournamentDetail({
   const tournamentId = Number(id);
 
   const [tournament, categories] = await Promise.all([
-    attempt(
-      api.GET("/api/v1/tournaments/{tournament_id}", {
-        params: { path: { tournament_id: tournamentId } },
-      }),
-    ),
-    attempt(
-      api.GET("/api/v1/categories", {
-        params: { query: { tournament_id: tournamentId } },
-      }),
-    ),
+    getTournament(tournamentId),
+    getCategories(tournamentId),
   ]);
 
   if (!tournament.ok) {
@@ -45,8 +37,10 @@ export async function TournamentDetail({
     tournament.data.status === "in_progress" && categories.ok
       ? await fetchCategoryStats(categories.data)
       : undefined;
-  // After the requests: the moment the data on screen was fetched.
-  const updatedAt = new Date().toISOString();
+  // The oldest of what's on screen: the reads are cached for a few seconds.
+  const updatedAt = categories.ok
+    ? [tournament.fetchedAt, categories.fetchedAt].toSorted()[0]
+    : tournament.fetchedAt;
 
   return (
     <>
@@ -91,11 +85,7 @@ async function fetchCategoryStats(
       // Without a bracket there's nothing to ask for: one request less per category, and this
       // runs again on every live refresh.
       if (!category.has_bracket) return [category.id, null] as const;
-      const bracket = await attempt(
-        api.GET("/api/v1/categories/{category_id}/bracket", {
-          params: { path: { category_id: category.id } },
-        }),
-      );
+      const bracket = await getBracket(category.id);
       if (bracket.ok) {
         return [category.id, bracketStats(bracket.data.matches)] as const;
       }

@@ -17,6 +17,8 @@ import { parseRoundPoints, type RoundPoints } from "@/lib/scoring";
 import { addRound, type RoundState } from "./actions";
 
 type MatchScoreFormProps = {
+  /** Sent along so the action can refresh that category on the public site. */
+  categoryId: number;
   match: Match;
   roundName: string;
   roundsToWin: number;
@@ -27,6 +29,7 @@ type MatchScoreFormProps = {
 };
 
 export function MatchScoreForm({
+  categoryId,
   match,
   roundName,
   roundsToWin,
@@ -75,6 +78,7 @@ export function MatchScoreForm({
 
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-4">
+      <input type="hidden" name="categoryId" value={categoryId} />
       <input type="hidden" name="matchId" value={match.id} />
       <input type="hidden" name="roundNumber" value={nextRound} />
       <div className="flex items-baseline justify-between gap-3 text-sm">

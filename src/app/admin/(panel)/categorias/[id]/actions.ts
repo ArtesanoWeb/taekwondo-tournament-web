@@ -1,6 +1,8 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
+
+import { categoryTag, PUBLIC_TAG } from "@/lib/api/tags";
 
 import { parseRoundPoints } from "@/lib/scoring";
 import { adminAttempt, getAdminApi } from "@/lib/session";
@@ -24,6 +26,8 @@ export async function generateBracket(
   );
   if (!result.ok) return { error: result.error.message };
 
+  // `has_bracket` changes in the tournament's category list too.
+  updateTag(PUBLIC_TAG);
   refresh();
   return {};
 }
@@ -64,6 +68,7 @@ export async function registerAthlete(
     };
   }
 
+  updateTag(categoryTag(categoryId));
   refresh();
   return { registeredId: athleteId };
 }
@@ -93,6 +98,8 @@ export async function withdrawRegistration(
     return { error: result.error.message };
   }
 
+  // Only the registration's id comes in: which category it was isn't known here.
+  updateTag(PUBLIC_TAG);
   refresh();
   return {};
 }
@@ -113,6 +120,7 @@ export async function addRound(
   const red = String(formData.get("red") ?? "");
   const blue = String(formData.get("blue") ?? "");
   const matchId = Number(formData.get("matchId"));
+  const categoryId = Number(formData.get("categoryId"));
   const roundNumber = Number(formData.get("roundNumber"));
   if (!Number.isInteger(matchId) || !Number.isInteger(roundNumber)) {
     return { error: "No se pudo identificar el combate.", red, blue };
@@ -141,6 +149,10 @@ export async function addRound(
     return { error: result.error.message, red, blue };
   }
 
+  // The bracket on the public site: the category's own tag if the form sent it.
+  updateTag(
+    Number.isInteger(categoryId) ? categoryTag(categoryId) : PUBLIC_TAG,
+  );
   refresh();
   return {};
 }
