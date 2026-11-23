@@ -7,6 +7,52 @@ desarrollo inicial y puede cambiar entre versiones.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-18
+
+Pulido del admin y del celular: se navega deslizando el dedo, el sistema recuerda dónde quedaste,
+todo pide confirmación y la categoría terminada muestra el podio completo.
+
+### Added
+
+- Modo oscuro/claro con un ícono arriba a la derecha; sigue al sistema hasta que se elige uno (#110).
+- Administración en celular: deslizar con el dedo pasa entre Atletas, Clubes, Torneos, Rankings y
+  Más, y la sección siguiente se ve mientras se desliza; tocar la barra inferior también desliza
+  (#113).
+- Sitio público: deslizar en cualquier parte de la pantalla cambia entre las pestañas de torneos
+  (#112).
+- Llaves: podio de la categoría terminada con campeón, segundo lugar (quien perdió la final) y
+  tercer lugar (quien perdió la semifinal contra el campeón), con medallas propias (#122).
+- Atletas: el grado se ve como un cinturón de su color, en la lista y al crear o editar (#120).
+- Atletas: en las sugerencias del buscador, la parte que coincide va en negrita (#116).
+- Celular: una flecha para volver arriba aparece al subir en una lista larga (#115).
+- Se recuerda la pestaña de torneos (portada y admin) y hasta dónde se corrió cada llave, y al
+  volver o recargar aparece directamente ahí (#114).
+- Confirmación antes de crear un torneo, una categoría, un atleta o un club, de inscribir un
+  atleta, de guardar cambios de un atleta o un club y de cerrar sesión en PC (#109).
+
+### Changed
+
+- Las pestañas de torneos dicen solo «En curso», «Inscripciones» y «Finalizados», sin el número
+  (#106).
+- Administración: en Torneos, las pestañas se cambian con los botones de arriba (deslizar es para
+  las secciones); dentro de un torneo y sus categorías no se muestra la barra inferior en celular.
+- Administración: el menú de PC ya no dice «Admin» (#107) y «Ver sitio» pasa a «Ver como visitante»
+  (#111).
+- Pantalla de puntaje sin el texto de la regla de los rounds y con el título en una línea (#108).
+- Se quita la lupa flotante de Atletas: su lugar lo ocupa la flecha para volver arriba.
+
+### Fixed
+
+- Las pestañas de torneos del admin ya no se parten en 2 líneas en celular (#106).
+
+### Known issues
+
+- Inscribir: todavía se ofrecen todos los atletas, no solo los que encajan en la categoría (#78);
+  espera el endpoint de la API 0.8.0.
+- Rankings y el perfil siguen siendo prototipos con datos de ejemplo.
+- Al recargar la portada, la barra inferior puede marcar «En curso» un instante antes de la
+  pestaña recordada.
+
 ## [0.5.1] - 2026-11-17
 
 ### Fixed
@@ -192,7 +238,8 @@ Primera versión: la base del proyecto y la lista pública de torneos (Sprint 1)
 - Las tarjetas de torneo enlazan a `/torneos/{id}`, que todavía muestra la página 404: el detalle del
   torneo llega en la próxima versión (#11).
 
-[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.1...develop
+[Unreleased]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.6.0...develop
+[0.6.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/ArtesanoWeb/taekwondo-tournament-web/compare/v0.4.0...v0.4.1
