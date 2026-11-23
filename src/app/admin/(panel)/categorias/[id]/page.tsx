@@ -112,6 +112,7 @@ async function AdminCategory({
             {athletes?.ok && (
               <RegisterAthleteButton
                 categoryId={categoryId}
+                categoryName={`${category.data.age_label} · ${category.data.weight_label}`}
                 options={toAthleteOptions(athletes.data, registrations.data)}
               />
             )}

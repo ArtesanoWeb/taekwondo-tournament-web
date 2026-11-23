@@ -14,10 +14,12 @@ import {
 } from "@/components/button-classes";
 import { Belt } from "@/components/belt";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { ConfirmSummary } from "@/components/confirm-summary";
 import { DigitsInput } from "@/components/digits-input";
 import { FormError } from "@/components/form-error";
 import type { Athlete, Club, Grade } from "@/lib/api/types";
 import { athleteToFormValues, EMPTY_ATHLETE_VALUES } from "@/lib/athlete-form";
+import { athleteSummary, formValues } from "@/lib/confirm-summary";
 import { genderLabels, gradeLabels } from "@/lib/labels";
 
 import { type AthleteState, saveAthlete } from "./actions";
@@ -238,11 +240,20 @@ function AthleteDialog({ athlete, clubs, onClose }: AthleteDialogProps) {
               className={primaryButtonClass}
               title={athlete ? "¿Guardar los cambios?" : "¿Crear el atleta?"}
               confirmLabel={athlete ? "Sí, guardar" : "Sí, crear"}
-              message={
-                athlete
-                  ? `Se actualizan los datos de ${athlete.name}.`
-                  : "Después podrás inscribirlo en las categorías de un torneo."
-              }
+              message={(form) => (
+                <ConfirmSummary
+                  rows={athleteSummary(
+                    formValues(form, EMPTY_ATHLETE_VALUES),
+                    clubs,
+                    athlete && athleteToFormValues(athlete),
+                  )}
+                  note={
+                    athlete
+                      ? undefined
+                      : "Después podrás inscribirlo en las categorías de un torneo."
+                  }
+                />
+              )}
             >
               {isPending ? "Guardando…" : "Guardar"}
             </ConfirmSubmitButton>
