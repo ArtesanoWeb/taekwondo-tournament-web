@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { BracketView } from "@/components/bracket-view";
 import { ErrorNotice } from "@/components/error-notice";
+import { LiveRefresh } from "@/components/live-refresh";
 import { TitleBar } from "@/components/title-bar";
 import { api, attempt } from "@/lib/api/client";
 import { formatAgeRange } from "@/lib/categories";
@@ -36,6 +37,9 @@ export async function CategoryBracket({
     }),
   );
   const enrollmentOpen = tournament.ok && tournament.data.status === "draft";
+  const inProgress = tournament.ok && tournament.data.status === "in_progress";
+  // After the requests: the moment the data on screen was fetched.
+  const updatedAt = new Date().toISOString();
 
   return (
     <>
@@ -44,13 +48,16 @@ export async function CategoryBracket({
         parentHref={`/torneos/${category.data.tournament_id}`}
         parentLabel={tournament.ok ? tournament.data.name : "Torneo"}
         subtitle={
-          <p>
-            {genderLabels[category.data.gender]}
-            {" · "}
-            {formatAgeRange(category.data.min_age, category.data.max_age)}
-            {" · "}
-            {beltGroupLabels[category.data.belt_group]}
-          </p>
+          <div className="flex flex-col gap-2">
+            <p>
+              {genderLabels[category.data.gender]}
+              {" · "}
+              {formatAgeRange(category.data.min_age, category.data.max_age)}
+              {" · "}
+              {beltGroupLabels[category.data.belt_group]}
+            </p>
+            {inProgress && <LiveRefresh updatedAt={updatedAt} />}
+          </div>
         }
       />
 

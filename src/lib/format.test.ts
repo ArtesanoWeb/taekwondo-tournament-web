@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDate, formatDateTime, formatShortDate } from "./format";
+import {
+  formatDate,
+  formatDateTime,
+  formatTime,
+  formatShortDate,
+} from "./format";
 
 describe("formatDate", () => {
   it("keeps the same calendar day regardless of the machine's timezone", () => {
@@ -23,5 +28,12 @@ describe("formatDateTime", () => {
     expect(formatDateTime("2026-10-04T22:18:11Z")).toBe(
       "4 de octubre de 2026 a las 6:18 p. m.",
     );
+  });
+});
+
+describe("formatTime", () => {
+  it("shows only the time of day, in Bolivian time", () => {
+    expect(formatTime("2026-10-04T22:18:11Z")).toBe("6:18 p. m.");
+    expect(formatTime(new Date("2026-10-04T12:05:00Z"))).toBe("8:05 a. m.");
   });
 });

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BracketStatsSummary } from "@/components/bracket-stats";
 import { ErrorNotice } from "@/components/error-notice";
+import { LiveRefresh } from "@/components/live-refresh";
 import { TitleBar } from "@/components/title-bar";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { api, attempt } from "@/lib/api/client";
@@ -44,6 +45,8 @@ export async function TournamentDetail({
     tournament.data.status === "in_progress" && categories.ok
       ? await fetchCategoryStats(categories.data)
       : undefined;
+  // After the requests: the moment the data on screen was fetched.
+  const updatedAt = new Date().toISOString();
 
   return (
     <>
@@ -61,6 +64,9 @@ export async function TournamentDetail({
               {" · "}
               {tournament.data.location}
             </p>
+            {tournament.data.status === "in_progress" && (
+              <LiveRefresh updatedAt={updatedAt} />
+            )}
           </div>
         }
       />
@@ -82,6 +88,9 @@ async function fetchCategoryStats(
 ): Promise<Map<number, BracketStats | null>> {
   const entries = await Promise.all(
     categories.map(async (category) => {
+      // Without a bracket there's nothing to ask for: one request less per category, and this
+      // runs again on every live refresh.
+      if (!category.has_bracket) return [category.id, null] as const;
       const bracket = await attempt(
         api.GET("/api/v1/categories/{category_id}/bracket", {
           params: { path: { category_id: category.id } },

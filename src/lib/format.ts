@@ -18,6 +18,11 @@ const dateTime = new Intl.DateTimeFormat(LOCALE, {
   timeZone: DISPLAY_TIME_ZONE,
 });
 
+const time = new Intl.DateTimeFormat(LOCALE, {
+  timeStyle: "short",
+  timeZone: DISPLAY_TIME_ZONE,
+});
+
 // A bare `YYYY-MM-DD` is parsed as UTC midnight, so it's formatted in UTC to keep the same day.
 function parseDate(isoDate: string): Date {
   return new Date(`${isoDate.slice(0, 10)}T00:00:00Z`);
@@ -37,4 +42,9 @@ export function formatShortDate(isoDate: string): string {
 export function formatDateTime(isoDateTime: string): string {
   const hasZone = /(Z|[+-]\d{2}:?\d{2})$/.test(isoDateTime);
   return dateTime.format(new Date(hasZone ? isoDateTime : `${isoDateTime}Z`));
+}
+
+/** A moment (`Date` or ISO with zone) as the Bolivian time of day: `6:18 p. m.` */
+export function formatTime(moment: Date | string): string {
+  return time.format(typeof moment === "string" ? new Date(moment) : moment);
 }
