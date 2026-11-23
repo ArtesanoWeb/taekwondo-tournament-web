@@ -67,6 +67,27 @@ Para empezar de cero, por ejemplo con datos de un seed anterior:
 No hace falta configurar CORS ni un proxy: el navegador nunca llama a la API, la pide el servidor de
 Next.
 
+### Pruebas E2E
+
+Pruebas en el navegador con [Playwright](https://playwright.dev) (`e2e/`), en celular (Pixel 7) y en
+PC (1280 px): la vista pública con los datos del seed y el ciclo completo de un torneo en el admin
+(crearlo, categoría, atletas, inscribir, iniciar, sortear, anotar la final y verla en vivo en el sitio
+público). Corren contra una **API descartable**, nunca contra la base de desarrollo:
+
+```bash
+npm run e2e:api   # API en http://localhost:8001: la imagen Docker de ../Backend con SQLite y el seed
+npm run e2e       # build de producción + Playwright (levanta el sitio en :3200)
+docker rm -f tkd-e2e-api   # al terminar
+```
+
+- Cada `npm run e2e:api` arranca con una base vacía y la vuelve a cargar con el seed.
+- Navegador: `npx playwright install chromium`, o usar el Chromium del sistema con
+  `PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium npm run e2e`.
+- `npm run e2e` hace un `next build`: conviene apagar `npm run dev` antes, porque los dos usan `.next/`.
+- En el CI, el job «Pruebas E2E» hace lo mismo con el backend del tag fijado en
+  `.github/workflows/ci.yml` (el que usa producción). Si falla, deja el reporte y las trazas como
+  artefacto `playwright-report`.
+
 ## Scripts
 
 | Comando                | Qué hace                                      |
@@ -81,6 +102,8 @@ Next.
 | `npm run format:check` | Verifica el formato sin modificar archivos    |
 | `npm run api:types`    | Regenera los tipos de la API desde OpenAPI    |
 | `npm run seed`         | Carga datos de prueba en el backend local     |
+| `npm run e2e:api`      | Levanta la API descartable de las pruebas E2E |
+| `npm run e2e`          | Build de producción y pruebas E2E             |
 
 ## Despliegue
 
