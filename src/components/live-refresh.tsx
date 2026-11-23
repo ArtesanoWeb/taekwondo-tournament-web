@@ -5,8 +5,11 @@ import { useEffect } from "react";
 
 import { formatTime } from "@/lib/format";
 
-/** Often enough to follow a match round by round, without hammering Render's free plan. */
-const REFRESH_INTERVAL_MS = 20_000;
+/**
+ * A scored round shows within a few seconds. Render doesn't see these requests one by one: the
+ * public reads are cached for a few seconds and shared by every visitor (`lib/api/public.ts`).
+ */
+const REFRESH_INTERVAL_MS = 5_000;
 
 /**
  * Keeps a public page up to date while its tournament is being played: it asks the server for

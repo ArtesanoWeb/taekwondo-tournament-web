@@ -1,7 +1,9 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+
+import { PUBLIC_TAG } from "@/lib/api/tags";
 
 import {
   type CategoryFormValues,
@@ -38,6 +40,8 @@ export async function createTournament(
   );
   if (!result.ok) return { error: result.error.message, values: typed };
 
+  // The public list shows tournaments with open inscriptions too.
+  updateTag(PUBLIC_TAG);
   // Outside any try/catch: `redirect` works by throwing.
   redirect(`/admin/torneos?creado=${result.data.id}`);
 }
@@ -95,6 +99,7 @@ export async function createCategory(
     };
   }
 
+  updateTag(PUBLIC_TAG);
   refresh();
   return { saved: true };
 }
@@ -125,6 +130,7 @@ export async function changeTournamentStatus(
   // e.g. 409 when finishing with matches still to play: `detail` names the pending categories.
   if (!result.ok) return { error: result.error.message };
 
+  updateTag(PUBLIC_TAG);
   refresh();
   return {};
 }

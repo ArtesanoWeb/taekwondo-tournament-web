@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { BracketStatsSummary } from "@/components/bracket-stats";
 import { ErrorNotice } from "@/components/error-notice";
-import { api, attempt } from "@/lib/api/client";
+import { getBracket, getCategories, getTournaments } from "@/lib/api/public";
 import type { Tournament } from "@/lib/api/types";
 import { type BracketStats, bracketStats } from "@/lib/bracket";
 import { formatDate } from "@/lib/format";
@@ -11,7 +11,7 @@ import { groupTournamentsByStatus } from "@/lib/tournaments";
 import { PublicTournamentTabs } from "./public-tournament-tabs";
 
 export async function TournamentList() {
-  const result = await attempt(api.GET("/api/v1/tournaments"));
+  const result = await getTournaments();
   if (!result.ok) return <ErrorNotice message={result.error.message} />;
 
   if (result.data.length === 0) {
@@ -72,23 +72,15 @@ async function fetchLiveStats(
 ): Promise<Map<number, BracketStats | null>> {
   const entries = await Promise.all(
     tournaments.map(async (tournament) => {
-      const categories = await attempt(
-        api.GET("/api/v1/categories", {
-          params: { query: { tournament_id: tournament.id } },
-        }),
-      );
+      const categories = await getCategories(tournament.id);
       if (!categories.ok) return null;
+      // Only the drawn ones: the others have no bracket to ask for.
       const brackets = await Promise.all(
-        categories.data.map((category) =>
-          attempt(
-            api.GET("/api/v1/categories/{category_id}/bracket", {
-              params: { path: { category_id: category.id } },
-            }),
-          ),
-        ),
+        categories.data
+          .filter((category) => category.has_bracket)
+          .map((category) => getBracket(category.id)),
       );
-      // A 404 is a category whose bracket wasn't drawn yet.
-      if (brackets.some((b) => !b.ok && b.error.status !== 404)) return null;
+      if (brackets.some((b) => !b.ok)) return null;
       const matches = brackets.flatMap((b) => (b.ok ? b.data.matches : []));
       return [
         tournament.id,
